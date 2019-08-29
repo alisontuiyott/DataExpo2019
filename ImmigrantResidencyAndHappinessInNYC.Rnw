@@ -1,0 +1,49 @@
+\documentclass{article}
+
+
+\title{Immigrant Residency and Happiness in NYC}
+\begin{document}
+\maketitle
+
+\section*{1. Introduction} (concept, dataset, background on surveys, Research Question, how does imm status connect to happiness )
+
+To be able to pursue imm pct , cite the happy index site and how it's been used 
+
+
+\section*{2. Data} (Data supplied from ASA, subsections for each data we pulled from other resources-how segments are diff, pick borough and include the pic of it sub-boroughed and use it as an example for all sections (pic) )
+
+Manhattan
+
+\subsubsection*{2.1 Existing data of immigrants}
+
+\subsubsection*{2.2 Income}
+
+
+\subsubsection*{2.3 Rent}
+
+
+\subsubsection*{2.4 Crime}
+
+
+\subsubsection*{2.5 Education}
+
+
+\subsubsection*{2.6 Health}
+
+
+Map of all 4 different types of maps in a row to show the diff shapes
+
+\subsubsection*{3. Methods: Aggregation of Happy Index}
+Here's a map of intersections. Noticed they didn't match up.
+
+
+\section*{4. Results} (what results were at JSM, what data shows)
+
+
+
+
+\section*{5. Conclusion and Discussion} (recap of all of what we did, connections, interesting findings, at a policy level "" should occur, happiness is skewed in favor of wealth, limitations)
+
+
+
+\end{document}
