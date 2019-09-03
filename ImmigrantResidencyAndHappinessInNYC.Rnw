@@ -5,14 +5,19 @@
 \begin{document}
 \maketitle
 
-\section*{1. Introduction} (concept, dataset, background on surveys, Research Question, how does imm status connect to happiness )
+\section*{1. Introduction} (concept, dataset, background on surveys, Research Question, how does imm status connect to happiness, To be able to pursue imm pct , cite the happy index site and how it's been used)
 
-To be able to pursue imm pct , cite the happy index site and how it's been used 
 
+Many people around the globe venture to the United States seeking the American Dream. In this analysis, we use the data provided by the the New York City Housing and Vacancy Survey (NYCHVS). According to the New York City Department of Housing Preservation and Development (HPD): \begin{quote} the NYCHVS is a representative survey of the New York City housing stock and population. It is the longest running housing survey in the country and is statutorily required. The Census Bureau has conducted the survey for the City since 1965. HPD is the only non-federal agency that sponsors a Census product. The HVS is a triennial survey with data collected about every three years. Each decade, a representative sample of housing units is selected, which represents the core sample.\end{quote} 
+Our goal is to use this data to explore the quality of life of immigrants in New York City through housing and neighborhood conditions. Our results hope to help guide individuals understand more about immigrant households and how it relates to their quality of life.
+
+To measure quality of life, we used a happiness metric. Happiness, according to Happy City and the New Economics Foundation, is a city's success in providing the conditions that create 'sustainable wellbeing'. This is made up of five main domains: work, place, community, education, and health. According to the Happy City Index 2016 Report, the happiness metric,"aims to be a practical tool that can help local policymakers understand how well their city is doing in comparison to the other cities and prioritize key policy areas". Using the data from the housing surveys about immigrant residency, we wanted to see if there was a connection to happiness. 
 
 \section*{2. Data} (Data supplied from ASA, subsections for each data we pulled from other resources-how segments are diff, pick borough and include the pic of it sub-boroughed and use it as an example for all sections (pic) )
 
 Manhattan
+
+In our attempts to create 
 
 \subsubsection*{2.1 Existing data of immigrants}
 
@@ -43,7 +48,6 @@ Here's a map of intersections. Noticed they didn't match up.
 
 
 \section*{5. Conclusion and Discussion} (recap of all of what we did, connections, interesting findings, at a policy level "" should occur, happiness is skewed in favor of wealth, limitations)
-
 
 
 \end{document}
