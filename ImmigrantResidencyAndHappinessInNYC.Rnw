@@ -47,8 +47,7 @@ Here's a map of intersections. Noticed they didn't match up.
 
 
 
-\section*{5. Conclusion and Discussion} (recap of all of what we did, connections, interesting findings, at a policy level "" should occur, happiness is skewed in favor of wealth, limitatons)
+\section*{5. Conclusion and Discussion} (recap of all of what we did, connections, interesting findings, at a policy level "" should occur, happiness is skewed in favor of wealth, limitations)
 
 
-\end{document}added a word
-add
+\end{document}
