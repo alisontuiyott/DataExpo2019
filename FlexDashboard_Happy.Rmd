@@ -1,0 +1,291 @@
+---
+title: "Immigrant Residency and Happiness in New York City"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(ggplot2)
+library(plotly)
+library(dplyr)
+load("PresentationData.Rdata")
+
+# # Some data manipulation
+# cdPlot <- cdPlot %>%
+#   mutate(medianDeathBracket = case_when(
+#     MedianDeathAge == "Age_65_69" ~ "65-69",
+#     MedianDeathAge == "Age_70_74" ~ "70-74",
+#     MedianDeathAge == "Age_75_79" ~ "75-79",
+#     MedianDeathAge == "Age_80_84" ~ "80-84",
+#     is.na(MedianDeathAge) ~ "NA"
+#   ))
+# 
+# 
+# mainPlot <- ggplot() +
+#   theme_minimal()+
+#   theme(axis.ticks = element_blank(),
+#         axis.text.x = element_blank(), axis.title.x=element_blank(),
+#         axis.text.y = element_blank(), axis.title.y=element_blank(),
+#         panel.border = element_blank(), 
+#         panel.grid.major = element_blank(), 
+#         panel.grid.minor = element_blank(),
+#         legend.background = element_rect(colour = "gray20"),
+#         plot.title = element_text(size=18, hjust=.5))
+
+```
+
+Happy Score Index
+=======================================================================
+
+Row
+-------------------------------------
+### Happy Score Index
+
+```{r}
+happy <- mainPlot+
+  geom_polygon(data=b2,aes(x=long,y=lat,fill=happiness,
+                        text=sprintf("\nSub-Borough: %s\nHappy Score: %.2f\nIncome Score: %.2f\nRent Score: %.2f\nCrime Score: %.2f\nEducation Score: %.2f\nDeath Score: %.2f", b,happiness,
+                              inc,
+                              rent,
+                              crime,
+                              edu,
+                              death),
+                   group = group),color="gray40",alpha=0.7)+
+  coord_map()+
+  geom_text(data= b_labs, aes(x=long, y=lat, label = name,
+                              fontface=2),color="black",size=5)+
+  scale_fill_gradient(name="",limits=c(0,5),
+                      high="goldenrod", low="white")
+ggplotly(happy,tooltip = "text",hoverText="none")
+``` 
+
+### Immigrant Residency
+
+```{r}
+immigrant <- mainPlot+
+  geom_polygon(data=b2,aes(x=long,y=lat,fill=immigrantPct,
+                        text=sprintf("\nSub-Borough: %s\nImmigrant Households: %.2f%%",b, immigrantPct),
+                   group = group),color="gray40",alpha=0.7)+
+  coord_map()+
+  geom_text(data= b_labs, aes(x=long, y=lat, label = name,
+                              fontface=2),color="black",size=5)+
+  scale_fill_gradient(name="",limits=c(15,80),
+                      breaks=seq(20,80,by=20),labels=paste0(seq(20,80,by=20),"%"),
+                      high="#6e016b", low="white")
+ggplotly(immigrant,tooltip = "text",hoverText="none")
+```
+
+
+Row{data-height=500}
+-------------------------------------
+
+### Happy Score Index vs. Immigrant Residency
+
+```{r}
+scatter <- ggplot(data=baseData) +
+  geom_point(aes(x=immigrantPct,y=happiness,color=name,size=totalNum,
+                 text=sprintf("\nBorough: %s\nSub-Borough: %s\nHappy Score: %.2f\nImmigrant Households: %.2f%%\nTotal Households: %s",name,b,happiness,immigrantPct,  format(totalNum,big.mark=",",scientific=FALSE))),alpha=0.7)+
+  labs(x="Immigrant Residency", y="Happy Score Index") +
+  theme_minimal()+
+  theme(legend.background = element_rect(colour = "gray20"),
+        #legend.key = element_rect(height=5),
+        legend.text = element_text(size=8),
+        axis.title = element_text(size=12),
+        axis.text = element_text(size=9))+
+  scale_x_continuous(limits=c(15,75),breaks = seq(10,90,by=10), labels=paste0(seq(10,90,by=10),"%"))+
+  scale_y_continuous(limits=c(0.75,5),breaks = seq(1,5))+
+  scale_color_discrete(name = "Borough")#+
+  # scale_size_continuous(name="Total Households",limits = c(35000,120000),
+  #                       breaks = seq(40000,120000,by=40000),
+  #                       labels = paste0(seq(40,120,by=40),"K"),
+  #                       range = c(1, 10))
+
+ggplotly(scatter,tooltip="text")
+```
+
+Project Overview
+=======================================================================
+
+**Abstract**
+
+Many people around the globe venture to the United States seeking the American Dream. We explore the quality of life of immigrants in New York City through housing and neighborhood conditions. Our results hope to help guide individuals understand more about immigrant households and how it relates to their quality of life.
+
+**Methodology**
+
+Happiness, according to Happy City and the New Economics Foundation, is a city's success in providing the conditions that create 'sustainable wellbeing'.
+This is made up of 5 main domains: work, place, community, education, and health. 
+
+To represent work, we used the average total household income from the Census data after adjusting for inflation. Note that the data was provided at a sub-borough level. To represent housing, we used the average monthly contract rent from the Census data after adjusting for inflation. Note that this data was also provided at a sub-borough level. To represent community, we used the total major felony offenses from the New York City Police Department. Note that the data is was provided at a precinct level. To represent education, we used the achievement rate of the high school graduate students from the New York City Department of Education. Note that the data is was provided at a school district level. To represent health, we used the median death age range from the New York City Department of Health and Mental Hygiene. Note that the data is was provided at a community district level.
+
+We intersected all of the geographic regions to create one map with small pieces, each representing a unique combination of the five facets. We calculated a weighted combination of the individual facets, scaled each happiness facet from 0 (Worst) to 1 (Best), and then took a sum of all five scaled facets to create the Happy Score Index.
+
+
+
+**Conclusion**
+
+Manhattan and Staten Island tend to have lower percentages of immigrant households and higher happy score indexes. The Bronx tends to have the reverse effect with higher percentages of immigrant households and lower happy score indexes. Then, there are also those boroughs, Queens and Brooklyn, that are relatively average across.
+
+**References**
+
+The data in this analysis is from multiple sources: New York City Department of Housing Preservation and Development, New York City Department of Education, New York City Open Data, and Happy City and the New Economics Foundation (NEF).
+
+**Acknowledgements**
+
+We would like to thank all of the students and faculty that helped us throughout the entire research journey and the Department of Statistics at Miami University.
+
+**Contact Information**
+
+If you have any further questions, please email tuiyotac@miamioh.edu
+
+Data
+=======================================================================
+
+Row
+-----------------------------------------------------------------------
+
+### Immigrant Residency
+
+```{r}
+immigrant <- mainPlot+
+  geom_polygon(data=b2,aes(x=long,y=lat,fill=immigrantPct,
+                        text=sprintf("\nSub-Borough: %s\nImmigrant Households: %.2f%%",b, immigrantPct),
+                   group = group),color="gray40",alpha=0.7)+
+  coord_map()+
+  geom_text(data= b_labs, aes(x=long, y=lat, label = name,
+                              fontface=2),color="black",size=5)+
+  scale_fill_gradient(name="",limits=c(15,80),
+                      breaks=seq(20,80,by=20),labels=paste0(seq(20,80,by=20),"%"),
+                      high="#6e016b", low="white")
+ggplotly(immigrant,tooltip = "text",hoverText="none")
+```
+
+### Average Total Household Income
+
+```{r}
+income <- mainPlot+
+  geom_polygon(data=b2,aes(x=long,y=lat,fill=avgTotalHouseholdIncome2,
+                           text=sprintf("\nSub-Borough: %s\nHousehold Income: $%s",
+                                        b,
+        format(round(avgTotalHouseholdIncome2,digits = 2),
+                     big.mark=",",scientific=FALSE)),
+                   group = group),color="gray40",alpha=0.7)+
+  coord_map()+
+  geom_text(data= b_labs, aes(x=long, y=lat, label = name,
+                              fontface=2),color="black",size=5)+
+  scale_fill_gradient(name="",limits=c(30000,210000),
+                       breaks=seq(30000,210000,by=45000),
+                       labels=paste0("$",seq(30,210,by=45),"K"),
+                      high="#005a32", low="white")
+ggplotly(income, tooltip='text',hoverText="none")
+```
+
+### Average Total Monthly Contract Rent
+
+```{r}
+rent <- mainPlot+
+  geom_polygon(data=b2,aes(x=long,y=lat,fill=avgTotalMonthlyRent2,
+                  text=sprintf("\nSub-Borough: %s\nMonthly Rent: $%s",
+                               b,
+        format(round(avgTotalMonthlyRent2,
+                     digits = 2),big.mark=",",scientific=FALSE)),
+                   group = group),color="gray40",alpha=0.7)+
+  coord_map()+
+  geom_text(data= b_labs, aes(x=long, y=lat, label = name,
+                              fontface=2),color="black",size=5)+
+  scale_fill_gradient(name="",limits=c(800,2800),
+                      breaks=seq(800,2800,by=400),
+                      labels=c("$800",paste0("$",seq(1.2,2.8,by=.4),"K")),
+                      high="#252525", low="white")
+ggplotly(rent,tooltip='text',hoverText="none")
+```
+
+
+Row
+-----------------------------------------------------------------------
+
+### Total Major Felony Offenses
+
+```{r}
+felony <- mainPlot+
+  geom_polygon(data=crimePlot,aes(x=long,y=lat,fill=CrimeCount,
+                        text=sprintf("\nPrecinct: %.0f\nTotal Offenses: %s", 
+                                     precinct,
+                                  format(CrimeCount,big.mark=",",scientific=FALSE)),
+                   group = group),color="gray40",alpha=0.7)+
+  coord_map()+
+  geom_text(data= b_labs, aes(x=long, y=lat, label = name,
+                              fontface=2),color="black",size=5)+
+  scale_fill_gradient(name="",
+                       limits=c(60,3500), breaks=seq(500,3500,by=1000), 
+                       labels=c("500","1,500","2,500","3,500"),
+                      high="#cb181d", low="white")
+ggplotly(felony,tooltip="text",hoverText="none")
+```
+
+### Education Achieved Rate
+
+```{r}
+achieve <- mainPlot+
+  geom_polygon(data=eduPlot,aes(x=long,y=lat,fill=AchievedRate,
+                  text=sprintf("\nSchool District: %.0f\nAchievement Rate: %.2f%%",
+                               SchoolDist,AchievedRate*100),
+                   group = group),color="gray40",alpha=0.7)+
+  coord_map()+
+  geom_text(data= b_labs, aes(x=long, y=lat, label = name,
+                              fontface=2),color="black",size=5)+
+  scale_fill_gradient(name="",limits=c(0,0.6),
+                      breaks=seq(0,0.6,by=0.2),
+                      labels=paste0(seq(0,60,by=20),"%"),
+                      high="#2171b5", low="white")
+ggplotly(achieve,tooltip='text',hoverText="none")
+```
+
+### Median Death Age
+
+```{r}
+death <- mainPlot+
+  geom_polygon(data=cdPlot,aes(x=long,y=lat,fill=medianDeathBracket,
+                    text=sprintf("\nCommunity District: %s\nMedian Death Range: %s",
+                                 cdName, medianDeathBracket),
+                   group = group),color="gray40",alpha=0.7)+
+  coord_map()+
+  geom_text(data= b_labs, aes(x=long, y=lat, label = name,
+                              fontface=2),color="black",size=5)+
+  scale_fill_manual(name="",
+                    #breaks=c("Age_65_69","Age_70_74","Age_75_79","Age_80_84",NA),
+                    breaks=c("65-69","70-74","75-79","80-84","NA"),
+                    values=c("#fed98e","#fe9929","#d95f0e","#993404","white"))
+ggplotly(death,tooltip = 'text',hoverText="none")
+```
+
+Aggregation Map
+=======================================================================
+
+**Description**
+
+This map overlays all the different geographic regions that are necessary to calculate the happy score index. Each region has a unique combination of sub-borough, precinct, school district and community district.
+
+In our analysis, we scaled each measure to (0,1) where 0 represents bad or not happy and 1 represents good or happy. After scaling, we then took a weighted average within the subborough based on these segmentations and weights. 
+
+```{r}
+aggregateMap <- left_join(aggregateMap, cdKey)
+d <- highlight_key(aggregateMap, ~b)
+aggregateData <- mainPlot+
+  geom_polygon(data=d,aes(x=long,y=lat,
+                                     group =group,
+                                     text=sprintf("\nSub-Borough: %s\nPrecinct: %.f\nSchool District: %.f\nCommunity District: %s",b,Precinct,SchoolDist,cdName)),
+               fill="#dfc27d",color="gray40",alpha=0.7)+
+  coord_map()+
+  geom_text(data= b_labs, aes(x=long, y=lat, 
+                              label = name,fontface=2),
+            color="black",size=5)
+ggplotly(aggregateData,tooltip = "text",hoverText="none") %>%
+ highlight(on="plotly_click",off="plotly_doubleclick",
+              color = "#fdae6b",selected = attrs_selected(opacity = 0.7),opacityDim = getOption("opacityDim", 0.4))
+```
+
+
+
