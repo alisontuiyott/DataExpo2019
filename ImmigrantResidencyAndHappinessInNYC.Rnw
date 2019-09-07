@@ -8,32 +8,44 @@
 \section*{1. Introduction} (concept, dataset, background on surveys, Research Question, how does imm status connect to happiness, To be able to pursue imm pct , cite the happy index site and how it's been used)
 
 
-Many people around the globe venture to the United States seeking the American Dream. In this analysis, we use the data provided by the the New York City Housing and Vacancy Survey (NYCHVS). According to the New York City Department of Housing Preservation and Development (HPD): \begin{quote} the NYCHVS is a representative survey of the New York City housing stock and population. It is the longest running housing survey in the country and is statutorily required. The Census Bureau has conducted the survey for the City since 1965. HPD is the only non-federal agency that sponsors a Census product. The HVS is a triennial survey with data collected about every three years. Each decade, a representative sample of housing units is selected, which represents the core sample.\end{quote} 
+Many people around the globe venture to the United States seeking the American Dream. In this analysis, we use the data provided by the New York City Housing and Vacancy Survey (NYCHVS). According to the New York City Department of Housing Preservation and Development (HPD): \begin{quote} the NYCHVS is a representative survey of the New York City housing stock and population. It is the longest running housing survey in the country and is statutorily required. The Census Bureau has conducted the survey for the City since 1965. HPD is the only non-federal agency that sponsors a Census product. The HVS is a triennial survey with data collected about every three years. Each decade, a representative sample of housing units is selected, which represents the core sample.\end{quote} 
 Our goal is to use this data to explore the quality of life of immigrants in New York City through housing and neighborhood conditions. Our results hope to help guide individuals understand more about immigrant households and how it relates to their quality of life.
 
-To measure quality of life, we used a happiness metric. Happiness, according to Happy City and the New Economics Foundation, is a city's success in providing the conditions that create 'sustainable wellbeing'. This is made up of five main domains: work, place, community, education, and health. According to the Happy City Index 2016 Report, the happiness metric,"aims to be a practical tool that can help local policymakers understand how well their city is doing in comparison to the other cities and prioritize key policy areas". Using the data from the housing surveys about immigrant residency, we wanted to see if there was a connection to happiness. 
+To measure quality of life, we utilize a happiness metric. Happiness, according to Happy City and the New Economics Foundation, is a city's success in providing the conditions that create 'sustainable wellbeing'. Sustainable wellbeing is made up of five main domains: work, place, community, education, and health. According to the Happy City Index 2016 Report, the happiness metric,"aims to be a practical tool that can help local policymakers understand how well their city is doing in comparison to the other cities and prioritize key policy areas". Using the data from the housing surveys about immigrant residency, we attempt to find a connection to happiness. 
 
-\section*{2. Data} (Data supplied from ASA, subsections for each data we pulled from other resources-how segments are diff, pick borough and include the pic of it sub-boroughed and use it as an example for all sections (pic) )
-
-Manhattan
-
-In our attempts to create 
-
-\subsubsection*{2.1 Existing data of immigrants}
-
-\subsubsection*{2.2 Income}
+\section*{2. Data} (Data supplied from ASA, subsections for each data we pulled from other resources-how segments are diff, pick borough and include the pic of it sub-boroughed and use it as an example for all sections (pic), Focus on Manhattan)
 
 
-\subsubsection*{2.3 Rent}
+In New York City, there are five boroughs: Brooklyn, Bronx, Manhattan, Queens, and Staten Island. These boroughs are smaller than cities, but larger than towns. Within each borough there are smaller subsections of land almost equivalent to a town that the data provided by the NYCHVS calls sub-boroughs. For the purpose of this paper, we focus on Manhattan and its sub-boroughs. However, the analysis completed for the 2019 Data Expo, was over all of the boroughs in New York City.
+
+In order to compare immigrant residency to happiness, we extract the immigrant residency information from the data provided by the NYCHVS. To create the happiness metric, we need a measure for the five main domains: work, place, community, education, and health. For work and place, we utilize the NYCHVS data. The rest of the domains require data from external resources, including the New York City Police Department, the New York City Department of Education, and the New York City Department of Health and Mental Hygiene.
+
+\subsubsection*{2.1 Immigrant Residency: Place of Birth}
 
 
-\subsubsection*{2.4 Crime}
+In the NYCHVS data, there is a field that identifies the place of the householder's birth. Using this field, we determine whether a given household is an immigrant household. We applied the sample weights to the number of immigrant households and calculated the percentage of immigrant households within each sub-borough. Below is a map of Manhattan illustrating immigrant residency by sub-borough.
+
+**INSERT IMMIGRANT MAP**
+
+\subsubsection*{2.2 Work: Income}
+
+In the NYCHVS data, there is a field that identifies total household income. We assumed this would be a relatively decent measure of work. Using this field, we adjusted for inflation and calculated the average total household income per sub-borough. Below is a map of Manhattan illustrating average total household income by sub-borough.
+
+**INSERT INCOME MAP**
+
+\subsubsection*{2.3 Place: Rent}
+
+In the NYCHVS data, there is a field that identifies monthly contract rent. We assumed this would be a relatively decent measure of place. Using this field, we adjusted for inflation and calculated the average monthly contract rent per sub-borough. Below is a map of Manhattan illustrating average average monthly contract rent by sub-borough.
+
+**INSERT RENT MAP**
+
+\subsubsection*{2.4 Community: Crime}
 
 
-\subsubsection*{2.5 Education}
+\subsubsection*{2.5 Education: High School Achievement Rates}
 
 
-\subsubsection*{2.6 Health}
+\subsubsection*{2.6 Health: Mortality Age Range}
 
 
 Map of all 4 different types of maps in a row to show the diff shapes
@@ -48,6 +60,8 @@ Here's a map of intersections. Noticed they didn't match up.
 
 
 \section*{5. Conclusion and Discussion} (recap of all of what we did, connections, interesting findings, at a policy level "" should occur, happiness is skewed in favor of wealth, limitations)
+
+
 
 
 \end{document}
