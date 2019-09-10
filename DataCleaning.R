@@ -75,3 +75,77 @@ completeData <- completeData %>%
       Year == 2011 ~ avgMonthlyContractRent * (currentCPI / 330.5),
       Year == 2014 ~ avgMonthlyContractRent * (currentCPI / 348.3),
       Year == 2017 ~ avgMonthlyContractRent * (currentCPI / 361) ) ) 
+
+
+#####################
+# Crime Data
+crime2 <- read_xls("crimeData.xls",skip = 2,n_max=616)
+crime2$precinct <- rep(unique(crime2$PCT)[-2],each=8)
+crimeData2 <- crime2 %>%
+  filter(CRIME =="TOTAL SEVEN MAJOR FELONY OFFENSES") %>%
+  dplyr::select(-PCT) %>%
+  tidyr::gather(Year,CrimeCount,"2000":"2018") %>%
+  mutate(Year = as.numeric(Year)) %>%
+  filter(Year %in% c(seq(2002,2017,by=3))) %>%
+  rename(crime = CRIME)
+#save(crimeData2,file="Crime2.Rdata")
+
+
+######################
+# Education Data
+edu <- read_xlsx(path = "gradRates.xlsx",sheet = 6) %>%
+  mutate(ClassOf = `Cohort Year`+4,
+         Year = case_when(
+           ClassOf %in% c(2010,2011) ~ 2011,
+           ClassOf %in% c(2012:2014) ~ 2014,
+           ClassOf %in% c(2015) ~ 2017)) %>%
+  #filter(ClassOf %in% c(2011,2014)) %>%
+  rename(TotalAPMCohort =`# APM Cohort`,
+         EnteringYear = `Cohort Year`,
+         AchievingAPM = `# achieving APM`) %>%
+  dplyr::select(DBN,School,ClassOf,Year,EnteringYear,TotalAPMCohort,AchievingAPM) %>%
+  mutate(sd = substr(DBN,1,2),
+         randomLetter = substr(DBN,3,3),
+         sID = substr(DBN,4,7),
+         borough = case_when(
+           randomLetter == "M" ~ "Manhattan",
+           randomLetter == "X" ~ "Bronx",
+           randomLetter == "K" ~ "Brooklyn",
+           randomLetter == "Q" ~ "Queens",
+           randomLetter == "R" ~ "Staten Island",
+           TRUE ~ "Else") ) %>%
+  dplyr::select(borough,sd,sID,ClassOf,Year,EnteringYear,TotalAPMCohort,AchievingAPM)
+
+edu <- edu %>%
+  group_by(Year, sd,borough) %>%
+  mutate(AchievingAPM = as.numeric(ifelse(AchievingAPM == "s",NA,AchievingAPM)),
+         TotalAPMCohort = as.numeric(ifelse(TotalAPMCohort == "s",NA,TotalAPMCohort))) %>%
+  summarise(nSchools = n(),
+            APMCohort = sum(TotalAPMCohort,na.rm = T),
+            Achieved = sum(AchievingAPM,na.rm = T),
+            AchievedRate = Achieved / APMCohort)
+
+######################
+# Health Data
+mortality <- read.csv("mortality.csv") %>%
+  select(Community_District,Age__28days:Age_85_,Total,Year)
+
+AgeLevels <- sort(colnames(mortality)[-c(1,22,23)],decreasing = T)
+cdLevels <- as.character(unique(mortality$Community_District))
+
+mortality <- mortality %>%
+  gather(AgeBucket,DeathCount,Age__28days:Age_85_) %>%
+  mutate(AgeBucket = factor(AgeBucket,levels=AgeLevels)) %>%
+  group_by(Community_District,Year) %>%
+  arrange(AgeBucket) %>%
+  mutate(MedianSearchValue = Total/2,
+         DeathCount= ifelse(is.na(DeathCount),0,DeathCount),
+         CumulativeDeathCount = cumsum(DeathCount),
+         MedianIndicator = ifelse(CumulativeDeathCount >= MedianSearchValue,1,0)) %>%
+  filter(MedianIndicator == 1) %>%
+  filter(CumulativeDeathCount == min(CumulativeDeathCount)) %>%
+  rename(TotalDeaths = Total, 
+         MedianDeathAge = AgeBucket) %>%
+  dplyr::select(Community_District,Year,TotalDeaths,MedianDeathAge)
+
+
