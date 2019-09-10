@@ -49,9 +49,11 @@ For a measure of the community, we choose crime data provided by the New York Ci
 For a measure of the education, we choose high school graduation data provided by the New York City Department of Education. Our assumption is a community with many high school graduates might positively affect the happiness of the households in that area. This data is provided at the school district level. Every school district in New York City is unique and may not be the same areas designated as sub-boroughs in the  NYCHVS data. Also, school districts may not align with the precincts either. The education data provided lists each school within a school district, their cohort, and the number of graduates in each cohort. A cohort is all students who first entered ninth grade in a given school year (the cohort of 2006 entered ninth grade in the 2006-2007 school year). Graduates are defined as those students earning either a Local or Regents diploma and exclude those earning either a special education (IEP) diploma or GED. 
 
 There is also a metric in the dataset that lists the number of graduates achieving Aspirational Performance Measure (APM). The New York State Education Department (NYSED) defined English/Math Aspirational Performance Measure (APM) as the percentage of students that after their fourth year in high school have met NYSED standards:
->Graduated by August with a Regents or Local diploma, AND
->Earned a 75 or higher on the English Regents, AND
->Earned an 80 or higher on one Math Regents
+\begin{description}
+  \item[$\bullet$] Graduated by August with a Regents or Local diploma, AND
+  \item[$\bullet$] Earned a 75 or higher on the English Regents, AND
+  \item[$\bullet$] Earned an 80 or higher on one Math Regents
+\end{description}
 
 Instead of simply using the number of high school graduates as the metric to gauge the happiness of a school district, we utlize the number of high school graduates who achieved APM. This metric measures the number of graduates that are more likely to go on to college, obtain a job, and contribute to society.  
 
