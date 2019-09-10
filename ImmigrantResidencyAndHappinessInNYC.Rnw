@@ -23,24 +23,25 @@ In order to compare immigrant residency to happiness, we extract the immigrant r
 \subsubsection*{2.1 Immigrant Residency: Place of Birth}
 
 
-In the NYCHVS data, there is a field that identifies the place of the householder's birth. Using this field, we determine whether a given household is an immigrant household. We applied the sample weights to the number of immigrant households and calculated the percentage of immigrant households within each sub-borough. Below is a map of Manhattan illustrating immigrant residency by sub-borough.
+In the NYCHVS data, there is a field that identifies the place of the householder's birth. Using this field, we determine whether a given household is an immigrant household. We apply the sample weights provided to the number of immigrant households and calculate the percentage of immigrant households within each sub-borough. Below is a map of Manhattan illustrating immigrant residency by sub-borough.
 
 **INSERT IMMIGRANT MAP**
 
 \subsubsection*{2.2 Work: Income}
 
-In the NYCHVS data, there is a field that identifies total household income. We assumed this would be a relatively decent measure of work. Using this field, we adjusted for inflation and calculated the average total household income per sub-borough. Below is a map of Manhattan illustrating average total household income by sub-borough.
+In the NYCHVS data, there is a field that identifies total household income. We assume this is a relatively decent measure of work. Using this field, we adjust for inflation and calculate the average total household income per sub-borough. Below is a map of Manhattan illustrating average total household income by sub-borough.
 
 **INSERT INCOME MAP**
 
 \subsubsection*{2.3 Place: Rent}
 
-In the NYCHVS data, there is a field that identifies monthly contract rent. We assumed this would be a relatively decent measure of place. Using this field, we adjusted for inflation and calculated the average monthly contract rent per sub-borough. Below is a map of Manhattan illustrating average average monthly contract rent by sub-borough.
+In the NYCHVS data, there is a field that identifies monthly contract rent. We assume this is a relatively decent measure of place. Using this field, we adjust for inflation and calculate the average monthly contract rent per sub-borough. Below is a map of Manhattan illustrating average average monthly contract rent by sub-borough.
 
 **INSERT RENT MAP**
 
 \subsubsection*{2.4 Community: Crime}
 
+For a measure of the community, we choose crime at a precinct level. A community with high crime might negatively affect the happiness of the households in that area. This data is provided at the precinct level. Every precinct in New York City is unique and does not overlap with 
 
 \subsubsection*{2.5 Education: High School Achievement Rates}
 
@@ -65,3 +66,6 @@ Here's a map of intersections. Noticed they didn't match up.
 
 
 \end{document}
+
+
+
