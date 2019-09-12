@@ -148,4 +148,99 @@ mortality <- mortality %>%
          MedianDeathAge = AgeBucket) %>%
   dplyr::select(Community_District,Year,TotalDeaths,MedianDeathAge)
 
+######################
+# Aggregating Data
+
+# Read in shape file
+boros = readOGR("C:/Users/POA5/Documents/MiamiAlison3/ASA_Comp/ASA_Data/BoroughMap/nybb.shp")
+
+# Look for NYC specific places
+nyplaces = pumas("NY",year=2017)
+
+# Extract the geoids we need from the NYCHVS data
+geoID = c(3603710L, 3603802L, 3603707L, 3604006L, 3604009L, 3604010L, 
+           3603801L, 3604007L, 3604114L, 3604016L, 3603804L, 3604105L, 3604015L, 
+           3603803L, 3604112L, 3604018L, 3604104L, 3603805L, 3604014L, 3604113L, 
+           3604017L, 3604111L, 3604106L, 3604013L, 3603702L, 3603806L, 3604011L, 
+           3603704L, 3604103L, 3604008L, 3603703L, 3604108L, 3604012L, 3603808L, 
+           3603709L, 3604110L, 3604005L, 3603701L, 3603807L, 3604107L, 3603706L, 
+           3604002L, 3604102L, 3604003L, 3603809L, 3603901L, 3603708L, 3604109L, 
+           3603902L, 3604004L, 3603705L, 3603810L, 3604101L, 3603903L, 3604001L)
+
+# Extract the geoids we have in the nyplaces
+nyGeoID = unique(as.numeric(nyplaces@data$GEOID10))
+
+# Double check if we have all the geoids we need (should be true)
+geoID %in% nyGeoID %>% sum ==55
+
+# Extract only the good ones
+sub_nyc = nyplaces[nyplaces@data$GEOID10 %in% geoID,]
+
+# outline = gUnaryUnion(boros)
+# row.names(sub_nyc@data) = getSpPPolygonsIDSlots(gIntersection(sub_nyc, outline, byid = T)) 
+# sub_nyc = SpatialPolygonsDataFrame(
+#   gIntersection(sub_nyc, outline, byid = T),
+#   data = sub_nyc@data
+# )
+
+#save(sub_nyc,file = "sub_borough_shapefile.RData")
+load("sub_borough_shapefile.RData")
+
+# Read in individual shape files
+community = spTransform(readOGR("ASA_Data/nycd_19a/nycd.shp"),
+                        CRSobj = CRS("+init=epsg:2263"))
+police =    spTransform(readOGR("ASA_Data/nypp_19a/nypp.shp"),
+                        CRSobj = CRS("+init=epsg:2263"))
+school =    spTransform(readOGR("ASA_Data/nysd_19a/nysd.shp"),
+                        CRSobj = CRS("+init=epsg:2263"))
+borough = spTransform(sub_nyc,
+                      CRSobj = CRS("+init=epsg:2263"))
+
+# Fix up self intersections by making width=0
+community = gBuffer(community, byid = TRUE, width = 0)
+police = gBuffer(police, byid = TRUE, width = 0)
+school = gBuffer(school, byid = TRUE, width = 0)
+borough = gBuffer(borough, byid = TRUE, width = 0)
+
+# Intersect all the files, drop all points/lines and keep only polygons
+com_pol = gIntersection(community, police, byid = TRUE, drop_lower_td = TRUE)
+com_pol_school = gIntersection(com_pol, school, byid = T, drop_lower_td = TRUE)
+com_pol_school= gBuffer(com_pol_school, byid = T,width = 0)
+com_pol_school_bor = gIntersection(com_pol_school,borough, byid = T, drop_lower_td = TRUE)
+com_pol_school_bor= gBuffer(com_pol_school_bor, byid = T,width = 0)
+
+# Project data back to geographic coordinate system (long/lat)
+cps = spTransform(com_pol_school_bor,CRS("+proj=longlat +ellps=WGS84 +datum=WGS84"))
+
+# Store the IDs needed for later merging
+community@data$c = sapply(community@polygons, function(x) slot(x,"ID"))
+police@data$p = sapply(police@polygons, function(x) slot(x,"ID"))
+school@data$s = sapply(school@polygons, function(x) slot(x,"ID"))
+borough@data$b = sapply(borough@polygons, function(x) slot(x,"ID"))
+
+# Parse the automatically created IDs into useful columns for each shapefile
+regions = sapply(cps@polygons, function(x) slot(x,"ID")) %>%
+  str_split(" ",simplify = T) %>% as.data.frame() %>% mutate_if(is.factor, as.character)
+names(regions) = c("c","p","s","b","id")
+#regions <- regions[,-5]
+
+#left join on the real IDs
+regions = left_join(regions,community@data %>% dplyr::select(BoroCD,c))
+regions = left_join(regions,police@data %>% dplyr::select(Precinct,p))
+regions = left_join(regions,school@data %>% dplyr::select(SchoolDist,s))
+regions = left_join(regions,borough@data %>% dplyr::select(GEOID10,b) %>% mutate(b=str_split(b," ",simplify = T)[,1],
+                                                                                 id=as.character(rep(1,55))))
+#regions <- regions[,-5]
+
+#set row names so we can make an spdf
+row.names(regions) = paste(regions$c,regions$p,regions$s,regions$b,regions$id)
+
+#this is the final object you need.
+#left join all the  data files onto cps_regions@data 
+cps_regions = SpatialPolygonsDataFrame(cps,regions)
+
+#check that these both are 1 (data matches order of polygons)
+mean(rownames(cps_regions@data) == sapply(cps_regions@polygons, function(x) slot(x,"ID")))
+mean(rownames(cps_regions@data) == sapply(cps@polygons, function(x) slot(x,"ID")))
+
 

@@ -73,6 +73,14 @@ The data ranges from 1999 to 2014. Since the NYCHVS data is collected every thre
 
 \subsubsection*{3. Methods: Aggregation of Happy Index}
 
+The shape file data is provided by the New York City Department of City Planning. This website provides the shape file data for the Census blocks which is what was used in the NYCHVS data, school districts and community districts. The precinct shape files are provided by New York City OpenData.
+
+Starting with the NYCHVS data, we use the pumas function in the tigris package in R to extract New York specific data. We use the geoid's provided by the NYCHVS data to extract the necessary geoid's from the Public Use Microdata Area (PUMA) data. From there we can create an outline of New York City and the small sub-boroughs. The data is read in and projected to the Long Island State Plane coordinate reference system.
+
+In order to aggregate all of the different regions (Census blocks, police precincts, school districts, and community districts), we first remove all self intersections. To do this, we use the gBuffer function from the rgeos package in R to make the widths equal to zero. We use the gIntersection function from the same package to intersect the four different regions. At each intersection, we only keep the polygons we need. After the intersection is complete, we project the data back to the geographic coordinate system of longitude and latitudes.
+
+
+
 We intersect all of the geographic regions to create one map with small pieces, each representing a unique combination of the five measures (Income, Rent, Crime, etc.). We calculate a weighted combination of the individual measures within the sub-borough, scaled each happiness measure from 0 (Worst) to 1 (Best), and then took a sum of all five scaled measures to create the Happy Score Index.
 
 This map overlays all the different geographic regions that are necessary to calculate the happy score index. Each region has a unique combination of sub-borough, precinct, school district and community district.
