@@ -309,13 +309,17 @@ boroughMap <- SpatialPolygonsDataFrame(boroughMap,scaledBoroughs)
 mean(rownames(boroughMap@data) == sapply(boroughMap@polygons, function(x) slot(x,"ID")))
 mean(rownames(boroughMap@data) == sapply(boroughMap@polygons, function(x) slot(x,"ID")))
 
-b2 <- merge(fortify(boroughMap), as.data.frame(boroughMap), by.x="id", by.y=0)
-
 # Labelling (add labels for borough)
 nycBoroughs <- data.frame(plotCode=c(0:4),
                           name=c("Manhattan","Bronx","Staten Island",
                                  "Brooklyn", "Queens"),
                           dataCode=c(3,1,5,2,4))
+
+
+b2 <- merge(fortify(boroughMap), as.data.frame(boroughMap), by.x="id", by.y=0) %>%
+  left_join(nycBoroughs, by=c("Borough" = "dataCode"))
+
+
 
 b_labels <- b2 %>%
   group_by(Borough) %>%
@@ -325,10 +329,13 @@ b_labels<- left_join(b_labels,nycBoroughs,by=c("Borough"="dataCode")) %>%
   mutate(lat = ifelse(name=="Queens",lat+0.05,lat),
          long = ifelse(name=="Bronx",long-0.02,long))
 
-# Plot the data
-base <- ggplot(b2) +
-  #geom_path(aes(x=long,y=lat)) +
-  geom_polygon(aes(x=long,y=lat,fill=happiness,group = group),color="gray40",alpha=0.7)+
+# Save the data
+#save.image(file="CleanedData_Sep15.Rdata")
+load("CleanedData_Sep15.Rdata")
+
+# Plot Immigrant Residency, Happiness, Household Income, and Rent
+ggplot(b2) +
+  geom_polygon(aes(x=long,y=lat,fill=immigrantPct,group = group),color="gray40",alpha=0.7)+
   coord_quickmap()+
   theme_minimal()+
   geom_text(data= b_labels, aes(x=long, y=lat, label = name,fontface=2),color="black",size=5)+
@@ -340,7 +347,141 @@ base <- ggplot(b2) +
         panel.grid.minor = element_blank(),
         legend.background = element_rect(colour = "gray20"),
         plot.title = element_text(size=18, hjust=.5))+
-  scale_fill_gradient(name="Happiness",limits=c(0,5),
-                      high="gold", low="#969696")
-base
+  # scale_fill_gradient(name="Happiness\nScore\nIndex",limits=c(0,5),
+  #                     high="goldenrod", low="white")
+  scale_fill_gradient(name="Immigrant\nResidency",limits=c(15,80),
+                      breaks=seq(20,80,by=20),labels=paste0(seq(20,80,by=20),"%"),
+                      high="#6e016b", low="white")
+# scale_fill_gradient(name="Avg Total\nHousehold\nIncome",limits=c(30000,210000),
+#                     breaks=seq(30000,210000,by=45000),labels=paste0("$",seq(30,210,by=45),"K"),
+#                     high="#005a32", low="white")
+# scale_fill_gradient(name="Avg Total\nMonthly\nRent",limits=c(800,2800),
+#                     breaks=seq(800,2800,by=400),labels=c("$800",paste0("$",seq(1.2,2.8,by=.4),"K")),
+#                     high="#252525", low="#ffffff")
 
+
+# Plot Crime
+crime <- data.frame(crimeData2) %>%
+  filter(Year==2014) 
+police = gBuffer(police, byid = TRUE, width = 0)
+police = spTransform(police,CRS("+proj=longlat +ellps=WGS84 +datum=WGS84"))
+
+# Change the row names of the policeMap to precinct
+row.names(police@data) = as.character(police@data$Precinct)
+row.names(crime) = as.character(0:76)
+
+# Left join all the  data files onto police@data 
+police <- SpatialPolygonsDataFrame(police,crime)
+mean(rownames(police@data) == sapply(police@polygons, function(x) slot(x,"ID")))
+mean(rownames(police@data) == sapply(police@polygons, function(x) slot(x,"ID")))
+
+crimePlot <- merge(fortify(police), as.data.frame(police), by.x="id", by.y=0)
+
+# Plot Crime data
+ggplot(crimePlot) +
+  geom_polygon(aes(x=long,y=lat,fill=CrimeCount,group = group),color="gray40",alpha=0.7)+
+  coord_quickmap()+
+  theme_minimal()+
+  geom_text(data= b_labels, aes(x=long, y=lat, label = name,fontface=2),color="black",size=5)+
+  theme(axis.ticks = element_blank(),
+        axis.text.x = element_blank(), axis.title.x=element_blank(),
+        axis.text.y = element_blank(), axis.title.y=element_blank(),
+        panel.border = element_blank(), 
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        legend.background = element_rect(colour = "gray20"),
+        plot.title = element_text(size=18, hjust=.5))+
+  scale_fill_gradient(name="Total\nMajor\nFelony\nOffenses",limits=c(80,3800),
+                      breaks=seq(500,4000,by=1000),labels=c("< 500","1,500","2,500","> 3,500"),
+                      high="#cb181d", low="white")
+
+# Plot Education
+edu2 <- data.frame(edu) %>%
+  filter(Year==2014)
+school = gBuffer(school, byid = TRUE, width = 0)
+school = spTransform(school,CRS("+proj=longlat +ellps=WGS84 +datum=WGS84"))
+
+# Left join all the  data files onto police@data 
+school@data <- left_join(school@data,edu2,by=c("SchoolDist" = "schooldist"))
+eduPlot <- merge(fortify(school), as.data.frame(school), by.x="id", by.y=0)
+ggplot(eduPlot) +
+  geom_polygon(aes(x=long,y=lat,fill=AchievedRate,group = group),color="gray40",alpha=0.7)+
+  coord_quickmap()+
+  theme_minimal()+
+  geom_text(data= b_labels, aes(x=long, y=lat, label = name,fontface=2),color="black",size=5)+
+  theme(axis.ticks = element_blank(),
+        axis.text.x = element_blank(), axis.title.x=element_blank(),
+        axis.text.y = element_blank(), axis.title.y=element_blank(),
+        panel.border = element_blank(), 
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        legend.background = element_rect(colour = "gray20"),
+        plot.title = element_text(size=18, hjust=.5))+
+  scale_fill_gradient(name="Achieved\nRate",limits=c(0,0.6),
+                      breaks=seq(0,0.6,by=0.2),labels=paste0(seq(0,60,by=20),"%"),
+                      high="#2171b5", low="white")
+
+# Plot Health
+health2 <- data.frame(health) %>%
+  filter(Year==2014) %>%
+  mutate(MedianDeathAge = as.character(MedianDeathAge),
+         MedianDeathAge = as.factor(MedianDeathAge))
+community = gBuffer(community, byid = TRUE, width = 0)
+community = spTransform(community,CRS("+proj=longlat +ellps=WGS84 +datum=WGS84"))
+row.names(health2) = as.character(health2$cdCode)
+
+#left join all the  data files onto police@data 
+community@data <- left_join(community@data,health2,by=c("BoroCD" = "cdCode"))
+cdPlot <- merge(fortify(community), as.data.frame(community), by.x="id", by.y=0)
+ggplot(cdPlot) +
+  geom_polygon(aes(x=long,y=lat,fill=MedianDeathAge,group = group),color="gray40",alpha=0.7)+
+  coord_quickmap()+
+  theme_minimal()+
+  geom_text(data= b_labels, aes(x=long, y=lat, label = name,fontface=2),color="black",size=5)+
+  theme(axis.ticks = element_blank(),
+        axis.text.x = element_blank(), axis.title.x=element_blank(),
+        axis.text.y = element_blank(), axis.title.y=element_blank(),
+        panel.border = element_blank(), 
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        legend.background = element_rect(colour = "gray20"),
+        plot.title = element_text(size=18, hjust=.5))+
+  scale_fill_manual(name="Median\nDeath\nAge Range",
+                    breaks=c("Age_65_69","Age_70_74","Age_75_79","Age_80_84",NA),
+                    labels=c("65-69","70-74","75-79","80-84","NA"),
+                    values = c("#fed98e","#fe9929","#d95f0e","#993404","white"))
+
+# Plot aggregate data
+aggregateMap <- merge(fortify(cps_regions), as.data.frame(cps_regions), by.x="id", by.y=0)
+ggplot(aggregateMap) +
+  geom_polygon(aes(x=long,y=lat,group = group),fill="#dfc27d",color="gray20",alpha=0.7)+
+  coord_quickmap()+
+  theme_minimal()+
+  geom_text(data= b_labels, aes(x=long, y=lat, label = name,fontface=2),color="black",size=5)+
+  theme(axis.ticks = element_blank(),
+        axis.text.x = element_blank(), axis.title.x=element_blank(),
+        axis.text.y = element_blank(), axis.title.y=element_blank(),
+        panel.border = element_blank(), 
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        legend.background = element_rect(colour = "gray20"),
+        plot.title = element_text(size=18, hjust=.5))
+
+########## Scatter plot ########
+
+# Scatter plot of happy index vs. immigrant pct with area as size
+ggplot(data=b2) +
+  geom_point(aes(x=immigrantPct,y=happiness,color=name,size=totalNum),alpha=0.7)+
+  labs(x="Immigrant Residency", y="Happy Score Index") +
+  theme_minimal()+
+  theme(legend.background = element_rect(colour = "gray20"),
+        legend.text = element_text(size=12),
+        axis.title = element_text(size=12),
+        axis.text = element_text(size=9))+
+  scale_x_continuous(limits=c(15,75),breaks = seq(10,90,by=10), labels=paste0(seq(10,90,by=10),"%"))+
+  scale_y_continuous(limits=c(0.75,5),breaks = seq(1,5))+
+  scale_color_discrete(name = "Borough")+
+  scale_size_continuous(name="Total Households",limits = c(35000,120000),
+                        breaks = seq(40000,120000,by=40000),
+                        labels = paste0(seq(40,120,by=40),"K"),
+                        range = c(1, 10))

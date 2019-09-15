@@ -7,6 +7,16 @@
 \begin{document}
 \maketitle
 
+<<Setup, echo=FALSE, message=FALSE, warning=FALSE>>=
+library(pacman)
+p_load(ggplot2,Stack,dplyr,ggrepel,gridExtra,tidyr,
+       leaflet,plotly,readxl,rgdal,tigris,rgdal,rgeos,
+       maptools,sp,scales,stringr,raster)
+load("C:/Users/POA5/Documents/MiamiAlison3/ASA_Comp/CleanedData_Sep15.Rdata")
+@
+
+
+
 \section*{1. Introduction}
 
 Many people around the globe venture to the United States seeking the American Dream. In this analysis, we use the data provided by the New York City Housing and Vacancy Survey (NYCHVS). According to the New York City Department of Housing Preservation and Development (HPD): \begin{quote} the NYCHVS is a representative survey of the New York City housing stock and population. It is the longest running housing survey in the country and is statutorily required. The Census Bureau has conducted the survey for the City since 1965. HPD is the only non-federal agency that sponsors a Census product. The HVS is a triennial survey with data collected about every three years. Each decade, a representative sample of housing units is selected, which represents the core sample.\end{quote} 
@@ -24,25 +34,101 @@ In order to compare immigrant residency to happiness, we extract the immigrant r
 
 In the NYCHVS data, there is a field that identifies the place of the householder's birth. Using this field, we determine whether a given household is an immigrant household. We apply the sample weights provided to the number of immigrant households and calculate the percentage of immigrant households within each sub-borough. Below is a map of Manhattan illustrating immigrant residency by sub-borough.
 
-*INSERT IMMIGRANT MAP*
+<<Immigrant Residency 2014, echo=FALSE>>=
+# Plot Immigrant Residency
+ggplot(b2) +
+  geom_polygon(aes(x=long,y=lat,fill=immigrantPct,group = group),color="gray40",alpha=0.7)+
+  coord_quickmap()+
+  theme_minimal()+
+  geom_text(data= b_labels, aes(x=long, y=lat, label = name,fontface=2),color="black",size=5)+
+  theme(axis.ticks = element_blank(),
+        axis.text.x = element_blank(), axis.title.x=element_blank(),
+        axis.text.y = element_blank(), axis.title.y=element_blank(),
+        panel.border = element_blank(), 
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        legend.background = element_rect(colour = "gray20"),
+        plot.title = element_text(size=18, hjust=.5))+
+  scale_fill_gradient(name="Immigrant\nResidency",limits=c(15,80),
+                      breaks=seq(20,80,by=20),labels=paste0(seq(20,80,by=20),"%"),
+                      high="#6e016b", low="white")+
+  labs(title = "Immigrant Residency (2014)")
+@
 
 \subsubsection*{2.2 Work: Income}
 
 In the NYCHVS data, there is a field that identifies total household income. We assume this is a relatively decent measure of work. Using this field, we adjust for inflation and calculate the average total household income per sub-borough. Below is a map of Manhattan illustrating average total household income by sub-borough.
 
-*INSERT INCOME MAP*
+<<Income 2014, echo=FALSE>>=
+# Plot Household Income
+ggplot(b2) +
+  geom_polygon(aes(x=long,y=lat,fill=avgTotalHouseholdIncome2,group = group),color="gray40",alpha=0.7)+
+  coord_quickmap()+
+  theme_minimal()+
+  geom_text(data= b_labels, aes(x=long, y=lat, label = name,fontface=2),color="black",size=5)+
+  theme(axis.ticks = element_blank(),
+        axis.text.x = element_blank(), axis.title.x=element_blank(),
+        axis.text.y = element_blank(), axis.title.y=element_blank(),
+        panel.border = element_blank(), 
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        legend.background = element_rect(colour = "gray20"),
+        plot.title = element_text(size=18, hjust=.5))+
+scale_fill_gradient(name="Avg Total\nHousehold\nIncome",limits=c(30000,210000),
+                    breaks=seq(30000,210000,by=45000),labels=paste0("$",seq(30,210,by=45),"K"),
+                    high="#005a32", low="white")+
+  labs(title = "Work: Average Total Household Income (2014)")
+@
 
 \subsubsection*{2.3 Place: Rent}
 
 In the NYCHVS data, there is a field that identifies monthly contract rent. We assume this is a relatively decent measure of place. Using this field, we adjust for inflation and calculate the average monthly contract rent per sub-borough. Below is a map of Manhattan illustrating average monthly contract rent by sub-borough.
 
-*INSERT RENT MAP*
+<<Rent 2014, echo=FALSE>>=
+# Plot Monthly Contract Rent
+ggplot(b2) +
+  geom_polygon(aes(x=long,y=lat,fill=avgTotalMonthlyRent2,group = group),color="gray40",alpha=0.7)+
+  coord_quickmap()+
+  theme_minimal()+
+  geom_text(data= b_labels, aes(x=long, y=lat, label = name,fontface=2),color="black",size=5)+
+  theme(axis.ticks = element_blank(),
+        axis.text.x = element_blank(), axis.title.x=element_blank(),
+        axis.text.y = element_blank(), axis.title.y=element_blank(),
+        panel.border = element_blank(), 
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        legend.background = element_rect(colour = "gray20"),
+        plot.title = element_text(size=18, hjust=.5))+
+scale_fill_gradient(name="Avg Total\nMonthly\nRent",limits=c(800,2800),
+                    breaks=seq(800,2800,by=400),labels=c("$800",paste0("$",seq(1.2,2.8,by=.4),"K")),
+                    high="#252525", low="#ffffff")+
+  labs(title = "Place: Average Total Monthly Contract Rent (2014)")
+@
 
 \subsubsection*{2.4 Community: Crime}
 
 For a measure of the community, we choose crime data provided by the New York City Police Department. Our assumption is a community with high crime might negatively affect the happiness of the households in that area. This data is provided at the precinct level. A precinct is an area of a town as defined for police purposes. Every precinct in New York City is unique and may not be the same areas designated as sub-boroughs in the  NYCHVS data. The crime data provided lists the total number of seven major felony offenses per precinct per year from 2000 to 2018. Since the NYCHVS data is collected every three years, we only selected years that overlapped with the NYCHVS data. Below is a map of Manhattan illustrating total number of seven major felony offenses by precinct.
 
-*INSERT CRIME MAP*
+<<Crime 2014, echo=FALSE>>=
+# Plot Crime data
+ggplot(crimePlot) +
+  geom_polygon(aes(x=long,y=lat,fill=CrimeCount,group = group),color="gray40",alpha=0.7)+
+  coord_quickmap()+
+  theme_minimal()+
+  geom_text(data= b_labels, aes(x=long, y=lat, label = name,fontface=2),color="black",size=5)+
+  theme(axis.ticks = element_blank(),
+        axis.text.x = element_blank(), axis.title.x=element_blank(),
+        axis.text.y = element_blank(), axis.title.y=element_blank(),
+        panel.border = element_blank(), 
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        legend.background = element_rect(colour = "gray20"),
+        plot.title = element_text(size=18, hjust=.5))+
+  scale_fill_gradient(name="Total\nMajor\nFelony\nOffenses",limits=c(80,3800),
+                      breaks=seq(500,4000,by=1000),labels=c("< 500","1,500","2,500","> 3,500"),
+                      high="#cb181d", low="white")+
+  labs(title = "Community: Total Major Felony Offenses (2014)")
+@
 
 \subsubsection*{2.5 Education: High School Achievement Rates}
 
@@ -59,7 +145,26 @@ Instead of simply using the number of high school graduates as the metric to gau
 
 The education data is only available for cohorts that graduated from 2010 to 2015. We extrapolate the data for 2017 using the 2015 data and aggregate the other years into 2011 and 2014. Below is a map of Manhattan illustrating the rate of the number of achieved high school graduates and the number of total graduates in the cohort by school district.
 
-*INSERT EDUCATION MAP*
+<<Education 2014, echo=FALSE>>=
+# Plot Achievement Rate
+ggplot(eduPlot) +
+  geom_polygon(aes(x=long,y=lat,fill=AchievedRate,group = group),color="gray40",alpha=0.7)+
+  coord_quickmap()+
+  theme_minimal()+
+  geom_text(data= b_labels, aes(x=long, y=lat, label = name,fontface=2),color="black",size=5)+
+  theme(axis.ticks = element_blank(),
+        axis.text.x = element_blank(), axis.title.x=element_blank(),
+        axis.text.y = element_blank(), axis.title.y=element_blank(),
+        panel.border = element_blank(), 
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        legend.background = element_rect(colour = "gray20"),
+        plot.title = element_text(size=18, hjust=.5))+
+  scale_fill_gradient(name="Achieved\nRate",limits=c(0,0.6),
+                      breaks=seq(0,0.6,by=0.2),labels=paste0(seq(0,60,by=20),"%"),
+                      high="#2171b5", low="white")+
+  labs(title = "Education: Achievement Rate of HS Graduates (2014)")
+@
 
 \subsubsection*{2.6 Health: Mortality Age Range}
 
@@ -69,7 +174,27 @@ To calculate the mean death age, we calculate the average number of deaths. We s
 
 The data ranges from 1999 to 2014. Since the NYCHVS data is collected every three years, we only selected years that overlapped with the NYCHVS data. Below is a map of Manhattan illustrating median death age range by community district.
 
-*INSERT HEALTH MAP*
+<<Health 2014, echo=FALSE>>=
+# Plot Median Death Age
+ggplot(cdPlot) +
+  geom_polygon(aes(x=long,y=lat,fill=MedianDeathAge,group = group),color="gray40",alpha=0.7)+
+  coord_quickmap()+
+  theme_minimal()+
+  geom_text(data= b_labels, aes(x=long, y=lat, label = name,fontface=2),color="black",size=5)+
+  theme(axis.ticks = element_blank(),
+        axis.text.x = element_blank(), axis.title.x=element_blank(),
+        axis.text.y = element_blank(), axis.title.y=element_blank(),
+        panel.border = element_blank(), 
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        legend.background = element_rect(colour = "gray20"),
+        plot.title = element_text(size=18, hjust=.5))+
+  scale_fill_manual(name="Median\nDeath\nAge Range",
+                    breaks=c("Age_65_69","Age_70_74","Age_75_79","Age_80_84",NA),
+                    labels=c("65-69","70-74","75-79","80-84","NA"),
+                    values = c("#fed98e","#fe9929","#d95f0e","#993404","white"))+
+  labs(title = "Health: Median Death Age Range (2014)")
+@
 
 \subsection*{3. Methods}
 
@@ -81,22 +206,82 @@ Starting with the NYCHVS data, we use the pumas function in the tigris package i
 
 In order to aggregate all of the different regions (Census blocks, police precincts, school districts, and community districts), we first remove all self intersections. To do this, we use the gBuffer function from the rgeos package in R to make the widths equal to zero. We use the gIntersection function from the same package to intersect the four different regions. At each intersection, we only keep the polygons we need. After the intersection is complete, we project the data back to the geographic coordinate system of longitude and latitudes.
 
-After the intersections are complete, we return to the original four regions and extract the ID's for each dataset type by using the sapply function from base R. Every ID is unique for each polygon in the different regions (Census blocks, police precincts, etc.). We concatenate all four ID's to create a single ID for each unique polygon in the intersected data. We add this ID to the spatial polygon data frame. Using these ID's we can utilize the SpatialPolygons function from the sp package in R to left join all of the necessary data from the different regions to their respective polyons.
-
-\subsubsection*{3.2 Calculating Happy Score Index}
-
-
-
-We intersect all of the geographic regions to create one map with small pieces, each representing a unique combination of the five measures (Income, Rent, Crime, etc.). We calculate a weighted combination of the individual measures within the sub-borough, scaled each happiness measure from 0 (Worst) to 1 (Best), and then took a sum of all five scaled measures to create the Happy Score Index.
+After the intersections are complete, we return to the original four regions and extract the ID's for each dataset type by using the sapply function from base R. Every ID is unique for each polygon in the different regions (Census blocks, police precincts, etc.). We concatenate all four ID's to create a single ID for each unique polygon in the intersected data. We add this ID to the spatial polygon data frame. Using these ID's we can utilize the SpatialPolygons function from the sp package in R to left join all of the necessary data from the different regions to their respective polygons.
 
 This map overlays all the different geographic regions that are necessary to calculate the happy score index. Each region has a unique combination of sub-borough, precinct, school district and community district.
 
-*INSERT AGGREGATE MAP*
+<<Aggregate 2014, echo=FALSE>>=
+# Plot Aggregate Data
+ggplot(aggregateMap) +
+  geom_polygon(aes(x=long,y=lat,group = group),fill="#dfc27d",color="gray20",alpha=0.7)+
+  coord_quickmap()+
+  theme_minimal()+
+  geom_text(data= b_labels, aes(x=long, y=lat, label = name,fontface=2),color="black",size=5)+
+  theme(axis.ticks = element_blank(),
+        axis.text.x = element_blank(), axis.title.x=element_blank(),
+        axis.text.y = element_blank(), axis.title.y=element_blank(),
+        panel.border = element_blank(), 
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        legend.background = element_rect(colour = "gray20"),
+        plot.title = element_text(size=18, hjust=.5))+
+  labs(title = "Aggregate Data")
+@
 
-\section*{4. Results} (what results were at JSM, what data shows)
+\subsubsection*{3.2 Calculating Happy Score Index}
 
-Manhattan and Staten Island tend to have lower percentages of immigrant households and higher happy score indexes. The Bronx tends to have the reverse effect with higher percentages of immigrant households and lower happy score indexes. Then, there are also those boroughs, Queens and Brooklyn, that are relatively average across.
+When calculating the happy score index, we first take all of the data from the intersected regions and left join them with the data from precincts, school districts and community districts. We extract the area of each unique intersecting region, group by the sub-borough and take the weighted average of the different measures of happiness. (Note: For the housing measure of rent, we take the weighted average of the proportion of average monthly contract rent to average total household income. For the health measure of median death age range, we take the weighted average of the lowest value in the range.). We scale each happiness measure from 0 (Worst) to 1 (Best). We, then, take a sum of all five scaled measures to create the Happy Score Index.
 
+\section*{4. Results}
+
+This map below shows the happy score index  and the immigrant residency for each sub-borough.
+
+<<Happiness 2014, echo=FALSE>>=
+# Plot Happiness
+ggplot(b2) +
+  geom_polygon(aes(x=long,y=lat,fill=happiness,group = group),color="gray40",alpha=0.7)+
+  coord_quickmap()+
+  theme_minimal()+
+  geom_text(data= b_labels, aes(x=long, y=lat, label = name,fontface=2),color="black",size=5)+
+  theme(axis.ticks = element_blank(),
+        axis.text.x = element_blank(), axis.title.x=element_blank(),
+        axis.text.y = element_blank(), axis.title.y=element_blank(),
+        panel.border = element_blank(), 
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        legend.background = element_rect(colour = "gray20"),
+        plot.title = element_text(size=18, hjust=.5))+
+  scale_fill_gradient(name="Happiness\nScore\nIndex",limits=c(0,5),
+                      high="goldenrod", low="white")+
+  labs(title = "Happiness Score Index (2014)")
+
+@
+
+
+We create another visualization to better understand the association between immigrant residency and happy scores.
+
+<<Scatter 2014, echo=FALSE, warning=FALSE>>=
+# Plot scatter plot of happy index vs. immigrant pct with area as size
+ggplot(data=b2) +
+  geom_point(aes(x=immigrantPct,y=happiness,color=name,size=totalNum),alpha=0.7)+
+  labs(x="Immigrant Residency", y="Happy Score Index") +
+  theme_minimal()+
+  theme(legend.background = element_rect(colour = "gray20"),
+        legend.text = element_text(size=12),
+        axis.title = element_text(size=12),
+        axis.text = element_text(size=9))+
+  scale_x_continuous(limits=c(15,75),breaks = seq(10,90,by=10), labels=paste0(seq(10,90,by=10),"%"))+
+  scale_y_continuous(limits=c(0.75,5),breaks = seq(1,5))+
+  scale_color_discrete(name = "Borough")+
+  scale_size_continuous(name="Total Households",limits = c(35000,120000),
+                        breaks = seq(40000,120000,by=40000),
+                        labels = paste0(seq(40,120,by=40),"K"),
+                        range = c(1, 10))
+
+@
+
+
+From the plot above, we see that Manhattan and Staten Island tend to have lower percentages of immigrant households and higher happy score indexes. The Bronx tends to have the reverse effect with higher percentages of immigrant households and lower happy score indexes. Then, there are also those boroughs, Queens and Brooklyn, that are relatively average across.
 
 \section*{5. Discussion} (recap of all of what we did, connections, interesting findings, at a policy level "" should occur, happiness is skewed in favor of wealth, limitations)
 
