@@ -1,9 +1,11 @@
 # Read in necessary libraries & set directory
+setwd("C:/Users/POA5/Documents/MiamiAlison3/ASA_Comp")
 library(pacman)
 p_load(ggplot2,Stack,dplyr,ggrepel,gridExtra,tidyr,
-       leaflet,plotly,readxl,rgdal,tigris,rgdal,rgeos,maptools,sp,scales)
+       leaflet,plotly,readxl,rgdal,tigris,rgdal,rgeos,
+       maptools,sp,scales,stringr,raster)
 
-# Read in data
+############ Read in data ##############
 # filename1 <- paste("NYCHVS", 1991, "Occupied File for ASA Challenge_CSV.csv")
 # temp1 <- read.csv(filename1,  skip = 1, header = T)
 # counter <- 1993
@@ -27,9 +29,9 @@ allData_id <- allData %>%
       ( !(Place.of.Householder.s.Birth %in% c(9,10,98)) & Year.Identifier < 2005 ) |
         ( !(Place.of.Householder.s.Birth %in% c(7,9,98)) & Year.Identifier >= 2005 ), 1,0))
 
-# Complete Data W/ Sampling Weights and Immigration numbers
+######## Complete Data W/ Sampling Weights and Immigration numbers ##########
 completeData <- allData_id %>%
-  select(Year.Identifier,Borough, Sub.Borough.Area, GEO.id2,immigrant,
+  dplyr::select(Year.Identifier,Borough, Sub.Borough.Area, GEO.id2,immigrant,
          Monthly.contract.rent,
          Total.Household.Income.Recode,
          Household.Sampling.Weight..5.implied.decimal.places.) %>%
@@ -45,12 +47,11 @@ completeData <- allData_id %>%
          avgMonthlyContractRent = round(mean(monthlyContractRent,na.rm = T),digits = 2),
          avgTotalHouseholdIncome = round(mean(totalHouseholdIncome,na.rm = T),digits = 2) 
   ) %>%
-  select(Year,Borough, SubBorough, GEO.id2,immigrantNum,fgenNum,
-         sgenNum,totalNum,
-         immigrantPct,fgenPct,sgenPct,avgMonthlyContractRent,avgTotalHouseholdIncome) %>%
+  dplyr::select(Year,Borough, SubBorough, GEO.id2,immigrantNum,totalNum,
+         immigrantPct,avgMonthlyContractRent,avgTotalHouseholdIncome) %>%
   distinct() 
 
-# Adjust for inflation in income and rent
+############ Adjust for inflation in income and rent #############
 currentCPI <- 361
 completeData <- completeData %>%
   mutate(avgTotalHouseholdIncome2 = case_when(
@@ -77,8 +78,8 @@ completeData <- completeData %>%
       Year == 2017 ~ avgMonthlyContractRent * (currentCPI / 361) ) ) 
 
 
-#####################
-# Crime Data
+########## Crime Data ############
+
 crime2 <- read_xls("crimeData.xls",skip = 2,n_max=616)
 crime2$precinct <- rep(unique(crime2$PCT)[-2],each=8)
 crimeData2 <- crime2 %>%
@@ -89,10 +90,10 @@ crimeData2 <- crime2 %>%
   filter(Year %in% c(seq(2002,2017,by=3))) %>%
   rename(crime = CRIME)
 #save(crimeData2,file="Crime2.Rdata")
+#load("Crime2.Rdata")
 
+############ Education Data ###########
 
-######################
-# Education Data
 edu <- read_xlsx(path = "gradRates.xlsx",sheet = 6) %>%
   mutate(ClassOf = `Cohort Year`+4,
          Year = case_when(
@@ -119,16 +120,18 @@ edu <- read_xlsx(path = "gradRates.xlsx",sheet = 6) %>%
 edu <- edu %>%
   group_by(Year, sd,borough) %>%
   mutate(AchievingAPM = as.numeric(ifelse(AchievingAPM == "s",NA,AchievingAPM)),
-         TotalAPMCohort = as.numeric(ifelse(TotalAPMCohort == "s",NA,TotalAPMCohort))) %>%
+         TotalAPMCohort = as.numeric(ifelse(TotalAPMCohort == "s",NA,TotalAPMCohort)),
+         schooldist = as.numeric(as.character(sd))) %>%
+  group_by(Year, schooldist,borough) %>%
   summarise(nSchools = n(),
             APMCohort = sum(TotalAPMCohort,na.rm = T),
             Achieved = sum(AchievingAPM,na.rm = T),
             AchievedRate = Achieved / APMCohort)
 
-######################
-# Health Data
+######### Health Data ##############
+
 mortality <- read.csv("mortality.csv") %>%
-  select(Community_District,Age__28days:Age_85_,Total,Year)
+  dplyr::select(Community_District,Age__28days:Age_85_,Total,Year)
 
 AgeLevels <- sort(colnames(mortality)[-c(1,22,23)],decreasing = T)
 cdLevels <- as.character(unique(mortality$Community_District))
@@ -148,11 +151,27 @@ mortality <- mortality %>%
          MedianDeathAge = AgeBucket) %>%
   dplyr::select(Community_District,Year,TotalDeaths,MedianDeathAge)
 
-######################
-# Aggregating Data
+# Read in birth data
+birth <- read.csv("birth.csv")
+
+# Create key file for community district name and code
+cdKey <- as.data.frame(cbind(cdName = cdLevels,
+                             cdCode = as.numeric(as.character(birth$cd)))) %>%
+  distinct()
+
+# Join health related tables
+health <- cdKey %>%
+  mutate(cdCode = as.numeric(as.character(cdCode))) %>%
+  #left_join(birthData,by=c("cdCode"="cd")) %>%
+  left_join(mortality, by=c("cdName" = "Community_District"))
+#save(health, file="Health.Rdata")
+
+######## Aggregating Data ##############
 
 # Read in shape file
-boros = readOGR("C:/Users/POA5/Documents/MiamiAlison3/ASA_Comp/ASA_Data/BoroughMap/nybb.shp")
+boros = spTransform(readOGR("C:/Users/POA5/Documents/MiamiAlison3/ASA_Comp/ASA_Data/BoroughMap/nybb.shp"),
+                    CRSobj = CRS("+init=epsg:2263"))
+
 
 # Look for NYC specific places
 nyplaces = pumas("NY",year=2017)
@@ -174,17 +193,20 @@ nyGeoID = unique(as.numeric(nyplaces@data$GEOID10))
 geoID %in% nyGeoID %>% sum ==55
 
 # Extract only the good ones
-sub_nyc = nyplaces[nyplaces@data$GEOID10 %in% geoID,]
+sub_nyc = spTransform(nyplaces[nyplaces@data$GEOID10 %in% geoID,],
+                      CRSobj = CRS("+init=epsg:2263"))
 
-# outline = gUnaryUnion(boros)
-# row.names(sub_nyc@data) = getSpPPolygonsIDSlots(gIntersection(sub_nyc, outline, byid = T)) 
-# sub_nyc = SpatialPolygonsDataFrame(
-#   gIntersection(sub_nyc, outline, byid = T),
-#   data = sub_nyc@data
-# )
+
+
+outline = gUnaryUnion(boros)
+row.names(sub_nyc@data) = getSpPPolygonsIDSlots(gIntersection(sub_nyc, outline, byid = T))
+sub_nyc = SpatialPolygonsDataFrame(
+  gIntersection(sub_nyc, outline, byid = T),
+  data = sub_nyc@data
+)
 
 #save(sub_nyc,file = "sub_borough_shapefile.RData")
-load("sub_borough_shapefile.RData")
+#load("sub_borough_shapefile.RData")
 
 # Read in individual shape files
 community = spTransform(readOGR("ASA_Data/nycd_19a/nycd.shp"),
@@ -222,25 +244,103 @@ borough@data$b = sapply(borough@polygons, function(x) slot(x,"ID"))
 regions = sapply(cps@polygons, function(x) slot(x,"ID")) %>%
   str_split(" ",simplify = T) %>% as.data.frame() %>% mutate_if(is.factor, as.character)
 names(regions) = c("c","p","s","b","id")
-#regions <- regions[,-5]
 
-#left join on the real IDs
+# Left join on the real IDs
 regions = left_join(regions,community@data %>% dplyr::select(BoroCD,c))
 regions = left_join(regions,police@data %>% dplyr::select(Precinct,p))
 regions = left_join(regions,school@data %>% dplyr::select(SchoolDist,s))
 regions = left_join(regions,borough@data %>% dplyr::select(GEOID10,b) %>% mutate(b=str_split(b," ",simplify = T)[,1],
                                                                                  id=as.character(rep(1,55))))
-#regions <- regions[,-5]
+#regions = left_join(regions,borough@data %>% dplyr::select(GEOID10,b) )
 
-#set row names so we can make an spdf
+# Set row names so we can make an spdf
 row.names(regions) = paste(regions$c,regions$p,regions$s,regions$b,regions$id)
 
-#this is the final object you need.
-#left join all the  data files onto cps_regions@data 
+# Left join all the  data files onto cps_regions@data 
 cps_regions = SpatialPolygonsDataFrame(cps,regions)
 
-#check that these both are 1 (data matches order of polygons)
+# Check that these both are 1 (data matches order of polygons)
 mean(rownames(cps_regions@data) == sapply(cps_regions@polygons, function(x) slot(x,"ID")))
 mean(rownames(cps_regions@data) == sapply(cps@polygons, function(x) slot(x,"ID")))
 
+############## Happy Score Calculation #############################
+
+# Join all the data into one table
+allYears <- cps_regions@data %>%
+  left_join(crimeData2,by=c("Precinct"="precinct")) %>%
+  left_join(edu,by=c("SchoolDist"="schooldist",
+                     "Year")) %>%
+  left_join(health,by=c("BoroCD"="cdCode",
+                        "Year"="Year"))  %>%
+  mutate(GEOID10 = as.numeric(GEOID10)) %>%
+  left_join(completeData,by=c("GEOID10"="GEO.id2",
+                              "Year")) %>%
+  filter(Year == 2014)
+
+# Create happy score index
+scaledBoroughs = cbind(data.frame(area = area(cps_regions)), allYears) %>%
+  group_by(b) %>%
+  summarise(crime = weighted.mean(-CrimeCount,w = area,na.rm=T),
+            inc = weighted.mean(avgTotalHouseholdIncome2,w = area,na.rm=T),
+            rent = weighted.mean(-avgTotalMonthlyRent2/avgTotalHouseholdIncome2,w = area,na.rm=T),
+            edu = weighted.mean(AchievedRate,w = area,na.rm=T),
+            death = weighted.mean(as.numeric(stringr::str_sub(MedianDeathAge, 5,6)), w=area,na.rm=T)) %>%
+  ungroup() %>%
+  mutate_if(is.numeric,rescale,to=c(0,1)) %>%
+  mutate(happiness = crime+inc+rent+edu+death) 
+
+# Merge happy score w/ immigrant pct from allYears
+geoB <- allYears %>%
+  ungroup() %>%
+  dplyr::select(b,GEOID10) %>%
+  distinct()
+
+scaledBoroughs = as.data.frame(scaledBoroughs) %>%
+  left_join(geoB,by="b") %>%
+  left_join(filter(completeData,Year==2014),by=c("GEOID10"="GEO.id2"))
+row.names(scaledBoroughs) = paste(scaledBoroughs$b,rep(1,length(scaledBoroughs$b)))
+
+############# Plot the final result (happy score & immigrant pct) ########
+
+# Create shape and outline
+boroughMap = spTransform(borough,CRS("+proj=longlat +ellps=WGS84 +datum=WGS84"))
+boroughMap <- SpatialPolygonsDataFrame(boroughMap,scaledBoroughs)
+
+mean(rownames(boroughMap@data) == sapply(boroughMap@polygons, function(x) slot(x,"ID")))
+mean(rownames(boroughMap@data) == sapply(boroughMap@polygons, function(x) slot(x,"ID")))
+
+b2 <- merge(fortify(boroughMap), as.data.frame(boroughMap), by.x="id", by.y=0)
+
+# Labelling (add labels for borough)
+nycBoroughs <- data.frame(plotCode=c(0:4),
+                          name=c("Manhattan","Bronx","Staten Island",
+                                 "Brooklyn", "Queens"),
+                          dataCode=c(3,1,5,2,4))
+
+b_labels <- b2 %>%
+  group_by(Borough) %>%
+  summarize(lat = (max(lat) + min(lat)) / 2,
+            long = (max(long) + min(long)) / 2)
+b_labels<- left_join(b_labels,nycBoroughs,by=c("Borough"="dataCode")) %>%
+  mutate(lat = ifelse(name=="Queens",lat+0.05,lat),
+         long = ifelse(name=="Bronx",long-0.02,long))
+
+# Plot the data
+base <- ggplot(b2) +
+  #geom_path(aes(x=long,y=lat)) +
+  geom_polygon(aes(x=long,y=lat,fill=happiness,group = group),color="gray40",alpha=0.7)+
+  coord_quickmap()+
+  theme_minimal()+
+  geom_text(data= b_labels, aes(x=long, y=lat, label = name,fontface=2),color="black",size=5)+
+  theme(axis.ticks = element_blank(),
+        axis.text.x = element_blank(), axis.title.x=element_blank(),
+        axis.text.y = element_blank(), axis.title.y=element_blank(),
+        panel.border = element_blank(), 
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        legend.background = element_rect(colour = "gray20"),
+        plot.title = element_text(size=18, hjust=.5))+
+  scale_fill_gradient(name="Happiness",limits=c(0,5),
+                      high="gold", low="#969696")
+base
 

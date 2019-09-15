@@ -71,13 +71,19 @@ The data ranges from 1999 to 2014. Since the NYCHVS data is collected every thre
 
 *INSERT HEALTH MAP*
 
-\subsubsection*{3. Methods: Aggregation of Happy Index}
+\subsection*{3. Methods}
 
-The shape file data is provided by the New York City Department of City Planning. This website provides the shape file data for the Census blocks which is what was used in the NYCHVS data, school districts and community districts. The precinct shape files are provided by New York City OpenData.
+\subsubsection*{3.1 Aggregating the Data}
 
-Starting with the NYCHVS data, we use the pumas function in the tigris package in R to extract New York specific data. We use the geoid's provided by the NYCHVS data to extract the necessary geoid's from the Public Use Microdata Area (PUMA) data. From there we can create an outline of New York City and the small sub-boroughs. The data is read in and projected to the Long Island State Plane coordinate reference system.
+The shape file data is provided by the New York City Department of City Planning. This website provides the shape file data for the Census blocks which is what is used in the NYCHVS data, school districts for education and community districts for health. The precinct shape files for the crime data are provided by New York City OpenData.
+
+Starting with the NYCHVS data, we use the pumas function in the tigris package in R to extract New York specific data. We use the geoid's provided by the NYCHVS data to extract the necessary geoid's from the Public Use Microdata Area (PUMA) data. The data is read in and projected to the Long Island State Plane coordinate reference system. From there we can create an outline of New York City and the small sub-boroughs. 
 
 In order to aggregate all of the different regions (Census blocks, police precincts, school districts, and community districts), we first remove all self intersections. To do this, we use the gBuffer function from the rgeos package in R to make the widths equal to zero. We use the gIntersection function from the same package to intersect the four different regions. At each intersection, we only keep the polygons we need. After the intersection is complete, we project the data back to the geographic coordinate system of longitude and latitudes.
+
+After the intersections are complete, we return to the original four regions and extract the ID's for each dataset type by using the sapply function from base R. Every ID is unique for each polygon in the different regions (Census blocks, police precincts, etc.). We concatenate all four ID's to create a single ID for each unique polygon in the intersected data. We add this ID to the spatial polygon data frame. Using these ID's we can utilize the SpatialPolygons function from the sp package in R to left join all of the necessary data from the different regions to their respective polyons.
+
+\subsubsection*{3.2 Calculating Happy Score Index}
 
 
 
