@@ -257,7 +257,6 @@ ggplot(b2) +
 
 @
 
-
 We create another visualization to better understand the association between immigrant residency and happy scores.
 
 <<Scatter 2014, echo=FALSE, warning=FALSE>>=
@@ -283,9 +282,9 @@ ggplot(data=b2) +
 
 From the plot above, we see that Manhattan and Staten Island tend to have lower percentages of immigrant households and higher happy score indexes. The Bronx tends to have the reverse effect with higher percentages of immigrant households and lower happy score indexes. Then, there are also those boroughs, Queens and Brooklyn, that are relatively average across.
 
-\section*{5. Discussion} (recap of all of what we did, connections, interesting findings, at a policy level "" should occur, happiness is skewed in favor of wealth, limitations)
+\section*{5. Discussion}
 
-
+In this analysis, we utilized the NYCHVS data and other external resources to create a happiness metric to evaluate the quality of life for immigrant households in New York City. We took advantage of the happiness score index created by Happy City and the New Economics Foundation to create a metric for each sub-borough in New York City. From the happy score index map visualization, it is clear that most of Manhattan and Staten Island tend to be happier than some areas of Brooklyn/Queens and Bronx. It would be interesting to see if over time, these happy scores change within a given sub-borough. When analyzing the scatter plot visualization with all of the sub-boroughs, it would be interesting to figure out exactly which sub-boroughs were different compared to the borough averages. Overall, we know that happiness, in our calculations, is heavily skewed in favor of wealth. However, we know that being wealthier may not equate to being happier, but more wealth can alleviate other real life problems. 
 
 
 \end{document}
