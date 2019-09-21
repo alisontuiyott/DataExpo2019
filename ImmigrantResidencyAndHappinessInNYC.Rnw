@@ -10,7 +10,7 @@
 library(pacman)
 p_load(ggplot2,Stack,dplyr,ggrepel,gridExtra,tidyr,
        leaflet,plotly,readxl,rgdal,tigris,rgdal,rgeos,
-       maptools,sp,scales,stringr,raster,grid,gtable,egg)
+       maptools,sp,scales,stringr,raster,grid,gtable,egg,RColorBrewer)
 load("C:/Users/POA5/Documents/MiamiAlison3/ASA_Comp/CleanedData_Sep15.Rdata")
 
 # Set grid theme
@@ -223,7 +223,7 @@ After the intersections are complete, we return to the original four regions and
 
 \textbf{Figure 7} overlays all the different geographic regions that are necessary to calculate the happy score index. Each region has a unique combination of sub-borough, precinct, school district and community district.
 
-\begin{figure}
+\begin{figure}[t]
 
 <<Aggregate 2014, echo=FALSE>>=
 # Plot Aggregate Data for Brooklyn
@@ -231,18 +231,16 @@ tempGEO <- c(filter(scaledBoroughs,Borough==2) %>% distinct(GEOID10))$GEOID10
 tempAggregateMap <- filter(aggregateMap, GEOID10 %in% tempGEO)
 
 ggplot(tempAggregateMap) +
-  geom_polygon(aes(x=long,y=lat,group = group),fill="#dfc27d",color="gray20",alpha=0.5)+
+  geom_polygon(aes(x=long,y=lat,group = group),
+               fill="#dfc27d",color="gray20",alpha=0.3)+
   coord_quickmap()+
   theme_minimal()+
-  # geom_text(data= filter(b_labels, name=="Brooklyn"), aes(x=long, y=lat, label = name,fontface=2),color="black",size=5)+
-  theme(axis.ticks = element_blank(),
-        axis.text.x = element_blank(), axis.title.x=element_blank(),
-        axis.text.y = element_blank(), axis.title.y=element_blank(),
-        panel.border = element_blank(), 
-        panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(),
-        legend.background = element_rect(colour = "gray20"),
-        plot.title = element_text(size=18, hjust=.5))+
+  theme_special+
+  theme(legend.key.size = unit(1.2, "cm"),
+        plot.title = element_text(size=18),
+        legend.text = element_text(size=11),
+        legend.title = element_text(size=12),
+        legend.position = "none")+
   labs(title = "Brooklyn Aggregate Data",
        caption = "Figure 7")
 @
@@ -257,57 +255,126 @@ When calculating the happy score index, we first take all of the data from the i
 
 \textbf{Figure 8} shows the happy score index  and the immigrant residency for each sub-borough.
 
-\begin{figure}
-
+\begin{figure}[t]
 <<Happiness 2014, echo=FALSE>>=
 # Plot Happiness
 ggplot(b2) +
-  geom_polygon(aes(x=long,y=lat,fill=happiness,group = group),color="gray40",alpha=0.7)+
+  geom_polygon(aes(x=long,y=lat,fill=happiness,group = group),
+               color="gray40",alpha=0.7)+
   coord_quickmap()+
   theme_minimal()+
   geom_text(data= b_labels, aes(x=long, y=lat, label = name,fontface=2),color="black",size=5)+
-  theme(axis.ticks = element_blank(),
-        axis.text.x = element_blank(), axis.title.x=element_blank(),
-        axis.text.y = element_blank(), axis.title.y=element_blank(),
-        panel.border = element_blank(), 
-        panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(),
-        legend.background = element_rect(colour = "gray20"),
-        plot.title = element_text(size=18, hjust=.5))+
+  theme_special+
+  theme(legend.key.size = unit(1.2, "cm"),
+        plot.title = element_text(size=18),
+        legend.text = element_text(size=11),
+        legend.title = element_text(size=12),
+        legend.position = c(0.18,0.75))+
   scale_fill_gradient(name="Happiness\nScore\nIndex",limits=c(0,5),
                       high="goldenrod", low="white")+
   labs(title = "Happiness Score Index",
        caption = "Figure 8")
 
 @
-
 \end{figure}
 
 \textbf{Figure 9} is another visualization to better understand the association between immigrant residency and happy scores.
 
-\begin{figure}
-
+\begin{figure}[t]
 <<Scatter 2014, echo=FALSE, warning=FALSE>>=
 # Plot scatter plot of happy index vs. immigrant pct with area as size
-ggplot(data=b2) +
-  geom_point(aes(x=immigrantPct,y=happiness,color=name,size=totalNum),alpha=0.7)+
-  labs(x="Immigrant Residency", y="Happy Score Index",
-       title = "Sub-borough Analysis of Immigrant Residency and Happy Score Index",
-       caption = "Figure 9") +
-  theme_minimal()+
-  theme(legend.background = element_rect(colour = "gray20"),
-        legend.text = element_text(size=12),
-        axis.title = element_text(size=12),
-        axis.text = element_text(size=9))+
-  scale_x_continuous(limits=c(15,75),breaks = seq(10,90,by=10), 
-                     labels=paste0(seq(10,90,by=10),"%"))+
-  scale_y_continuous(limits=c(0.75,5),breaks = seq(1,5))+
-  scale_color_discrete(name = "Borough")+
-  scale_size_continuous(name="Total Households",limits = c(35000,120000),
-                        breaks = seq(40000,120000,by=40000),
-                        labels = paste0(seq(40,120,by=40),"K"),
-                        range = c(1, 10))
 
+# Create plot with only color/borough legend
+# scatb <- ggplot(data=b2) +
+#   geom_point(aes(x=immigrantPct,y=happiness,color=name),alpha=0.7)+
+#   labs(x="Immigrant Residency", y="Happy Score Index",
+#        title = "Sub-borough Analysis of Immigrant Residency and Happy Score Index") +
+#   theme_minimal()+
+#   theme(legend.background = element_rect(colour = "gray20"),
+#         legend.position = "top",
+#         legend.text = element_text(size=12),
+#         axis.title = element_text(size=12),
+#         axis.text = element_text(size=11))+
+#   guides(color = guide_legend(override.aes = list(size = 5)))+
+#   scale_x_continuous(limits=c(15,75),breaks = seq(10,90,by=10), 
+#                      labels=paste0(seq(10,90,by=10),"%"))+
+#   scale_y_continuous(limits=c(0.75,5),breaks = seq(1,5))+
+#   scale_color_brewer("",aesthetics = "colour",
+#                      palette = "Set2",type="qual")
+# 
+# # Extract the colour legend - leg1
+# leg1 <- gtable_filter(ggplot_gtable(ggplot_build(scatb)), "guide-box") 
+# 
+# # Create plot with only size legend
+# scath <- ggplot(data=b2) +
+#   geom_point(aes(x=immigrantPct,y=happiness,size=totalNum),alpha=0.7)+
+#   labs(x="Immigrant Residency", y="Happy Score Index",
+#        caption = "Figure 9") +
+#   theme_minimal()+
+#   theme(legend.background = element_rect(colour = "gray20"),
+#         legend.position = "bottom",
+#         legend.text = element_text(size=12),
+#         axis.title = element_text(size=12),
+#         axis.text = element_text(size=11))+
+#   scale_x_continuous(limits=c(15,75),breaks = seq(10,90,by=10), 
+#                      labels=paste0(seq(10,90,by=10),"%"))+
+#   scale_y_continuous(limits=c(0.75,5),breaks = seq(1,5))+
+#   scale_size_continuous(name="Total Households:",limits = c(35000,120000),
+#                         breaks = seq(35000,120000,by=20000),
+#                         labels = paste0(seq(35,120,by=20),"K"),
+#                         range = c(1, 10))
+# 
+# # Extract the size legend - leg2
+# leg2 <- gtable_filter(ggplot_gtable(ggplot_build(scath)), "guide-box") 
+# 
+# # Create a plot without any legend and both values
+# scat <- ggplot(data=b2) +
+#   geom_point(aes(x=immigrantPct,y=happiness,color=name,size=totalNum),alpha=0.7)+
+#   labs(x="Immigrant Residency", y="Happy Score Index"#,
+#        #title = "Sub-borough Analysis of Immigrant Residency and Happy Score Index",caption = "Figure 9"
+#        ) +
+#   theme_minimal()+
+#   theme(legend.position =  "none",
+#         legend.text = element_text(size=12),
+#         axis.title = element_text(size=12),
+#         axis.text = element_text(size=11))+
+#   scale_x_continuous(limits=c(15,75),breaks = seq(10,90,by=10), 
+#                      labels=paste0(seq(10,90,by=10),"%"))+
+#   scale_y_continuous(limits=c(0.75,5),breaks = seq(1,5))
+# 
+# # Create one plot, layer on top of another
+# scatNew <- arrangeGrob(leg1, scat, 
+#          heights = unit.c(leg1$height, unit(1, "npc") - leg1$height), ncol = 1)
+# 
+# scatNew <- arrangeGrob(scatNew, leg2,
+#           heights = unit.c(unit(1, "npc") - leg2$width, leg2$width), ncol = 1)
+# 
+# grid.newpage()
+# grid.draw(scatNew)
+
+ggplot(data=b2) +
+   geom_point(aes(x=immigrantPct,y=happiness,color=name,size=totalNum),alpha=0.7)+
+   labs(x="Immigrant Residency", y="Happy Score Index",
+        title = "Immigrant Residency and Happy Score Index", caption= "Figure 9") +
+   theme_minimal()+
+   theme(legend.background = element_rect(colour = "gray20"),
+         legend.position = "top",
+         legend.direction = "horizontal",
+         legend.box = "vertical",
+         plot.title = element_text(size=18),
+         legend.text = element_text(size=12),
+         axis.title = element_text(size=12),
+         axis.text = element_text(size=11))+
+   guides(color = guide_legend(override.aes = list(size = 5)))+
+   scale_x_continuous(limits=c(15,75),breaks = seq(10,90,by=10), 
+                      labels=paste0(seq(10,90,by=10),"%"))+
+   scale_y_continuous(limits=c(0.75,5),breaks = seq(1,5))+
+   scale_color_brewer("",aesthetics = "colour",
+                      palette = "Set2",type="qual")+
+   scale_size_continuous(name="Total Households:",limits = c(35000,120000),
+                         breaks = seq(35000,120000,by=20000),
+                         labels = paste0(seq(35,120,by=20),"K"),
+                         range = c(1, 10))
 @
 \end{figure}
 
@@ -321,7 +388,10 @@ In this analysis, we utilized the NYCHVS data and other external resources to cr
 \itemsep=0pt
 {\footnotesize
 \item 
-Aebischer, N. J., Robertson, P. A., and Kenward, R. E. (1993), ``Compositional Analysis of Habitat Use From Animal Radio-Tracking Data,'' {\it Ecology}, 74, 1313--1325.
+"Happy City Index." What Works Centre for Wellbeing, 27 Oct. 2014, whatworkswellbeing.org/case-study/happy-city-index/.
+
+\item
+Lewis, Sam Wren, and Saamah Abdallah. Happy City Index 2016 Report. Happy City Measurement and Policy Team, 2016, Happy City Index 2016 Report, www.happycity.org.uk/wp-content/uploads/2016/10/Happy-City-Index-2016-Report-FINAL.pdf.
 
 
 }
