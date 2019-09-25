@@ -233,8 +233,8 @@ bor_pol_school_com = gBuffer(bor_pol_school_com, byid = T,width = 0)
 
 
 # Project data back to geographic coordinate system (long/lat)
-bp = spTransform(bor_pol,CRS("+proj=longlat +ellps=WGS84 +datum=WGS84"))
-bps = spTransform(bor_pol_school,CRS("+proj=longlat +ellps=WGS84 +datum=WGS84"))
+# bp = spTransform(bor_pol,CRS("+proj=longlat +ellps=WGS84 +datum=WGS84"))
+# bps = spTransform(bor_pol_school,CRS("+proj=longlat +ellps=WGS84 +datum=WGS84"))
 bpsc = spTransform(bor_pol_school_com,CRS("+proj=longlat +ellps=WGS84 +datum=WGS84"))
 
 
@@ -245,19 +245,19 @@ school@data$s = sapply(school@polygons, function(x) slot(x,"ID"))
 community@data$c = sapply(community@polygons, function(x) slot(x,"ID"))
 
 
-# Parse the automatically created IDs into useful columns for each shapefile - borough & police
-bp_regions = sapply(bp@polygons, function(x) slot(x,"ID")) %>%
-  str_split(" ",simplify = T) %>% 
-  as.data.frame() %>% 
-  mutate_if(is.factor, as.character)
-names(bp_regions) = c("b","id","p")
-
-# Parse the automatically created IDs into useful columns for each shapefile - borough & police & school
-bps_regions = sapply(bps@polygons, function(x) slot(x,"ID")) %>%
-  str_split(" ",simplify = T) %>% 
-  as.data.frame() %>% 
-  mutate_if(is.factor, as.character)
-names(bps_regions) = c("b","id","p","s")
+# # Parse the automatically created IDs into useful columns for each shapefile - borough & police
+# bp_regions = sapply(bp@polygons, function(x) slot(x,"ID")) %>%
+#   str_split(" ",simplify = T) %>% 
+#   as.data.frame() %>% 
+#   mutate_if(is.factor, as.character)
+# names(bp_regions) = c("b","id","p")
+# 
+# # Parse the automatically created IDs into useful columns for each shapefile - borough & police & school
+# bps_regions = sapply(bps@polygons, function(x) slot(x,"ID")) %>%
+#   str_split(" ",simplify = T) %>% 
+#   as.data.frame() %>% 
+#   mutate_if(is.factor, as.character)
+# names(bps_regions) = c("b","id","p","s")
 
 # Parse the automatically created IDs into useful columns for each shapefile - borough & police & school & community
 bpsc_regions = sapply(bpsc@polygons, function(x) slot(x,"ID")) %>%
@@ -266,18 +266,18 @@ bpsc_regions = sapply(bpsc@polygons, function(x) slot(x,"ID")) %>%
             mutate_if(is.factor, as.character)
 names(bpsc_regions) = c("b","id","p","s","c")
 
-# Left join on the real IDs - borough & police regions
-bp_regions = left_join(bp_regions,borough@data %>% dplyr::select(GEOID10,b) %>% 
-                                                    mutate(b=str_split(b," ",simplify = T)[,1],
-                                                          id=as.character(rep(1,55))))
-bp_regions = left_join(bp_regions,police@data %>% dplyr::select(Precinct,p))
-
-# Left join on the real IDs - borough & police & school regions
-bps_regions = left_join(bps_regions,borough@data %>% dplyr::select(GEOID10,b) %>% 
-                         mutate(b=str_split(b," ",simplify = T)[,1],
-                                id=as.character(rep(1,55))))
-bps_regions = left_join(bps_regions,police@data %>% dplyr::select(Precinct,p))
-bps_regions = left_join(bps_regions,school@data %>% dplyr::select(SchoolDist,s))
+# # Left join on the real IDs - borough & police regions
+# bp_regions = left_join(bp_regions,borough@data %>% dplyr::select(GEOID10,b) %>% 
+#                                                     mutate(b=str_split(b," ",simplify = T)[,1],
+#                                                           id=as.character(rep(1,55))))
+# bp_regions = left_join(bp_regions,police@data %>% dplyr::select(Precinct,p))
+# 
+# # Left join on the real IDs - borough & police & school regions
+# bps_regions = left_join(bps_regions,borough@data %>% dplyr::select(GEOID10,b) %>% 
+#                          mutate(b=str_split(b," ",simplify = T)[,1],
+#                                 id=as.character(rep(1,55))))
+# bps_regions = left_join(bps_regions,police@data %>% dplyr::select(Precinct,p))
+# bps_regions = left_join(bps_regions,school@data %>% dplyr::select(SchoolDist,s))
 
 # Left join on the real IDs - borough & police & school & community regions
 bpsc_regions = left_join(bpsc_regions,borough@data %>% dplyr::select(GEOID10,b) %>% 
@@ -288,14 +288,14 @@ bpsc_regions = left_join(bpsc_regions,school@data %>% dplyr::select(SchoolDist,s
 bpsc_regions = left_join(bpsc_regions,community@data %>% dplyr::select(BoroCD,c))
 
 
-# Set row names so we can make an spdf - borough & police regions
-row.names(bp_regions) = paste(bp_regions$b, bp_regions$id,
-                              bp_regions$p)
-
-# Set row names so we can make an spdf - borough & police & school regions
-row.names(bps_regions) = paste(bps_regions$b, bps_regions$id,
-                               bps_regions$p,
-                               bps_regions$s)
+# # Set row names so we can make an spdf - borough & police regions
+# row.names(bp_regions) = paste(bp_regions$b, bp_regions$id,
+#                               bp_regions$p)
+# 
+# # Set row names so we can make an spdf - borough & police & school regions
+# row.names(bps_regions) = paste(bps_regions$b, bps_regions$id,
+#                                bps_regions$p,
+#                                bps_regions$s)
 
 
 # Set row names so we can make an spdf - borough & police & school & community regions
@@ -305,16 +305,16 @@ row.names(bpsc_regions) = paste(bpsc_regions$b, bpsc_regions$id,
                                 bpsc_regions$c)
 
 # Left join all the  data files onto cps_bpsc_regions@data
-bp_regions = SpatialPolygonsDataFrame(bp,bp_regions)
-bps_regions = SpatialPolygonsDataFrame(bps,bps_regions)
+# bp_regions = SpatialPolygonsDataFrame(bp,bp_regions)
+# bps_regions = SpatialPolygonsDataFrame(bps,bps_regions)
 bpsc_regions = SpatialPolygonsDataFrame(bpsc,bpsc_regions)
 
 # Check that these both are 1 (data matches order of polygons)
-mean(rownames(bp_regions@data) == sapply(bp_regions@polygons, function(x) slot(x,"ID")))
-mean(rownames(bp_regions@data) == sapply(bp@polygons, function(x) slot(x,"ID")))
-
-mean(rownames(bps_regions@data) == sapply(bps_regions@polygons, function(x) slot(x,"ID")))
-mean(rownames(bps_regions@data) == sapply(bps@polygons, function(x) slot(x,"ID")))
+# mean(rownames(bp_regions@data) == sapply(bp_regions@polygons, function(x) slot(x,"ID")))
+# mean(rownames(bp_regions@data) == sapply(bp@polygons, function(x) slot(x,"ID")))
+# 
+# mean(rownames(bps_regions@data) == sapply(bps_regions@polygons, function(x) slot(x,"ID")))
+# mean(rownames(bps_regions@data) == sapply(bps@polygons, function(x) slot(x,"ID")))
 
 mean(rownames(bpsc_regions@data) == sapply(bpsc_regions@polygons, function(x) slot(x,"ID")))
 mean(rownames(bpsc_regions@data) == sapply(bpsc@polygons, function(x) slot(x,"ID")))
@@ -543,17 +543,43 @@ ggplot(data=b2) +
                         range = c(1, 10))
 
 ########## Three aggregate plots ########
-tempGEO <- c(filter(scaledBoroughs,Borough==2) %>% distinct(GEOID10))$GEOID10
 
-bp_aggregateMap <- merge(fortify(bp_regions), as.data.frame(bp_regions), by.x="id", by.y=0) %>%
-                    filter(GEOID10 %in% tempGEO)
+# Select Brooklyn geo id's
+brooklyn_geo <- c(3604003, 3604002, 3604018, 3604006, 3604008, 3604014, 3604010, 3604016, 3604017,
+             3604007, 3604009, 3604015, 3604011, 3604012, 3604005, 3604013, 3604004, 3604001)
+brooklyn_aggregate <- merge(fortify(bpsc_regions), 
+                          as.data.frame(bpsc_regions), by.x="id", by.y=0) %>%
+                    filter(GEOID10 %in% brooklyn_geo)
+brooklyn_p <- unique(brooklyn_aggregate$p)
+brooklyn_s <- unique(brooklyn_aggregate$s)
+brooklyn_c <- unique(brooklyn_aggregate$c)
 
-ggplot(bp_aggregateMap) +
-  # geom_polygon(aes(x=long,y=lat,group = group,color=b),
-  #              fill="#DCDCDC", size=1)+
-  geom_polygon(aes(x=long,y=lat,group = group,fill=b,color=as.factor(Precinct)),
-               size=1.5)+
-  coord_quickmap()+
+b_bMap <- merge(fortify(borough), 
+                as.data.frame(borough), by.x="id", by.y=0) %>%
+          filter(GEOID10 %in% brooklyn_geo)
+
+b_pMap <- merge(fortify(police), 
+                as.data.frame(police), by.x="id", by.y=0) %>%
+          filter(p %in% brooklyn_p)
+
+b_sMap <- merge(fortify(school), 
+                as.data.frame(school), by.x="id", by.y=0) %>%
+          filter(s %in% brooklyn_s)
+
+b_cMap <- merge(fortify(community), 
+                as.data.frame(community), by.x="id", by.y=0) %>%
+          filter(c %in% brooklyn_c)
+
+ggplot() +
+  geom_polygon(data=b_bMap,aes(x=long,y=lat,group = group),
+               color="#1f78b4", fill="white", size=0.7)+
+  geom_polygon(data=b_pMap,aes(x=long,y=lat,group = group),
+               color="#33a02c",fill=NA,size=0.7)+
+  geom_polygon(data=b_sMap,aes(x=long,y=lat,group = group),
+               color="#d7191c",fill=NA,size=0.7)+
+  geom_polygon(data=b_cMap,aes(x=long,y=lat,group = group),
+               color="#fdae61",fill=NA,size=0.8)+
+  coord_equal()+
   theme_minimal()+
   theme(axis.ticks = element_blank(),
         axis.text.x = element_blank(), axis.title.x=element_blank(),
@@ -565,6 +591,6 @@ ggplot(bp_aggregateMap) +
         plot.title = element_text(size=18, hjust=.5))
 
 
-
+# Use sub-borough 71 to zoom in on specific pieces
 
 

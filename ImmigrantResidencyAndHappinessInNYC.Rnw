@@ -240,7 +240,8 @@ After the intersections are complete, we project the data back to the geographic
 
 <<Aggregate 2014, echo=FALSE,cache=TRUE>>=
 # Plot Aggregate Data for Brooklyn
-tempGEO <- c(filter(scaledBoroughs,Borough==2) %>% distinct(GEOID10))$GEOID10
+tempGEO <- c(filter(scaledBoroughs,Borough==2) %>% 
+               distinct(GEOID10))$GEOID10
 tempAggregateMap <- filter(aggregateMap, GEOID10 %in% tempGEO)
 
 ggplot(tempAggregateMap) +
