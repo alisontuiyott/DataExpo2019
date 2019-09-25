@@ -196,8 +196,6 @@ geoID %in% nyGeoID %>% sum ==55
 sub_nyc = spTransform(nyplaces[nyplaces@data$GEOID10 %in% geoID,],
                       CRSobj = CRS("+init=epsg:2263"))
 
-
-
 outline = gUnaryUnion(boros)
 row.names(sub_nyc@data) = getSpPPolygonsIDSlots(gIntersection(sub_nyc, outline, byid = T))
 sub_nyc = SpatialPolygonsDataFrame(
@@ -209,76 +207,134 @@ sub_nyc = SpatialPolygonsDataFrame(
 #load("sub_borough_shapefile.RData")
 
 # Read in individual shape files
-community = spTransform(readOGR("ASA_Data/nycd_19a/nycd.shp"),
-                        CRSobj = CRS("+init=epsg:2263"))
+borough = spTransform(sub_nyc,
+                      CRSobj = CRS("+init=epsg:2263"))
 police =    spTransform(readOGR("ASA_Data/nypp_19a/nypp.shp"),
                         CRSobj = CRS("+init=epsg:2263"))
 school =    spTransform(readOGR("ASA_Data/nysd_19a/nysd.shp"),
                         CRSobj = CRS("+init=epsg:2263"))
-borough = spTransform(sub_nyc,
-                      CRSobj = CRS("+init=epsg:2263"))
+community = spTransform(readOGR("ASA_Data/nycd_19a/nycd.shp"),
+                        CRSobj = CRS("+init=epsg:2263"))
 
 # Fix up self intersections by making width=0
-community = gBuffer(community, byid = TRUE, width = 0)
+borough = gBuffer(borough, byid = TRUE, width = 0)
 police = gBuffer(police, byid = TRUE, width = 0)
 school = gBuffer(school, byid = TRUE, width = 0)
-borough = gBuffer(borough, byid = TRUE, width = 0)
+community = gBuffer(community, byid = TRUE, width = 0)
+
 
 # Intersect all the files, drop all points/lines and keep only polygons
-com_pol = gIntersection(community, police, byid = TRUE, drop_lower_td = TRUE)
-com_pol_school = gIntersection(com_pol, school, byid = T, drop_lower_td = TRUE)
-com_pol_school= gBuffer(com_pol_school, byid = T,width = 0)
-com_pol_school_bor = gIntersection(com_pol_school,borough, byid = T, drop_lower_td = TRUE)
-com_pol_school_bor= gBuffer(com_pol_school_bor, byid = T,width = 0)
+bor_pol = gIntersection(borough, police, byid = TRUE, drop_lower_td = TRUE)
+bor_pol = gBuffer(bor_pol, byid = T, width = 0)
+bor_pol_school = gIntersection(bor_pol, school, byid = TRUE, drop_lower_td = TRUE)
+bor_pol_school = gBuffer(bor_pol_school, byid = T,width = 0)
+bor_pol_school_com = gIntersection(bor_pol_school,community, byid = T, drop_lower_td = TRUE)
+bor_pol_school_com = gBuffer(bor_pol_school_com, byid = T,width = 0)
+
 
 # Project data back to geographic coordinate system (long/lat)
-cps = spTransform(com_pol_school_bor,CRS("+proj=longlat +ellps=WGS84 +datum=WGS84"))
+bp = spTransform(bor_pol,CRS("+proj=longlat +ellps=WGS84 +datum=WGS84"))
+bps = spTransform(bor_pol_school,CRS("+proj=longlat +ellps=WGS84 +datum=WGS84"))
+bpsc = spTransform(bor_pol_school_com,CRS("+proj=longlat +ellps=WGS84 +datum=WGS84"))
+
 
 # Store the IDs needed for later merging
-community@data$c = sapply(community@polygons, function(x) slot(x,"ID"))
+borough@data$b = sapply(borough@polygons, function(x) slot(x,"ID"))
 police@data$p = sapply(police@polygons, function(x) slot(x,"ID"))
 school@data$s = sapply(school@polygons, function(x) slot(x,"ID"))
-borough@data$b = sapply(borough@polygons, function(x) slot(x,"ID"))
+community@data$c = sapply(community@polygons, function(x) slot(x,"ID"))
 
-# Parse the automatically created IDs into useful columns for each shapefile
-regions = sapply(cps@polygons, function(x) slot(x,"ID")) %>%
-  str_split(" ",simplify = T) %>% as.data.frame() %>% mutate_if(is.factor, as.character)
-names(regions) = c("c","p","s","b","id")
 
-# Left join on the real IDs
-regions = left_join(regions,community@data %>% dplyr::select(BoroCD,c))
-regions = left_join(regions,police@data %>% dplyr::select(Precinct,p))
-regions = left_join(regions,school@data %>% dplyr::select(SchoolDist,s))
-regions = left_join(regions,borough@data %>% dplyr::select(GEOID10,b) %>% mutate(b=str_split(b," ",simplify = T)[,1],
-                                                                                 id=as.character(rep(1,55))))
-#regions = left_join(regions,borough@data %>% dplyr::select(GEOID10,b) )
+# Parse the automatically created IDs into useful columns for each shapefile - borough & police
+bp_regions = sapply(bp@polygons, function(x) slot(x,"ID")) %>%
+  str_split(" ",simplify = T) %>% 
+  as.data.frame() %>% 
+  mutate_if(is.factor, as.character)
+names(bp_regions) = c("b","id","p")
 
-# Set row names so we can make an spdf
-row.names(regions) = paste(regions$c,regions$p,regions$s,regions$b,regions$id)
+# Parse the automatically created IDs into useful columns for each shapefile - borough & police & school
+bps_regions = sapply(bps@polygons, function(x) slot(x,"ID")) %>%
+  str_split(" ",simplify = T) %>% 
+  as.data.frame() %>% 
+  mutate_if(is.factor, as.character)
+names(bps_regions) = c("b","id","p","s")
 
-# Left join all the  data files onto cps_regions@data 
-cps_regions = SpatialPolygonsDataFrame(cps,regions)
+# Parse the automatically created IDs into useful columns for each shapefile - borough & police & school & community
+bpsc_regions = sapply(bpsc@polygons, function(x) slot(x,"ID")) %>%
+            str_split(" ",simplify = T) %>% 
+            as.data.frame() %>% 
+            mutate_if(is.factor, as.character)
+names(bpsc_regions) = c("b","id","p","s","c")
+
+# Left join on the real IDs - borough & police regions
+bp_regions = left_join(bp_regions,borough@data %>% dplyr::select(GEOID10,b) %>% 
+                                                    mutate(b=str_split(b," ",simplify = T)[,1],
+                                                          id=as.character(rep(1,55))))
+bp_regions = left_join(bp_regions,police@data %>% dplyr::select(Precinct,p))
+
+# Left join on the real IDs - borough & police & school regions
+bps_regions = left_join(bps_regions,borough@data %>% dplyr::select(GEOID10,b) %>% 
+                         mutate(b=str_split(b," ",simplify = T)[,1],
+                                id=as.character(rep(1,55))))
+bps_regions = left_join(bps_regions,police@data %>% dplyr::select(Precinct,p))
+bps_regions = left_join(bps_regions,school@data %>% dplyr::select(SchoolDist,s))
+
+# Left join on the real IDs - borough & police & school & community regions
+bpsc_regions = left_join(bpsc_regions,borough@data %>% dplyr::select(GEOID10,b) %>% 
+                          mutate(b=str_split(b," ",simplify = T)[,1],
+                                 id=as.character(rep(1,55))))
+bpsc_regions = left_join(bpsc_regions,police@data %>% dplyr::select(Precinct,p))
+bpsc_regions = left_join(bpsc_regions,school@data %>% dplyr::select(SchoolDist,s))
+bpsc_regions = left_join(bpsc_regions,community@data %>% dplyr::select(BoroCD,c))
+
+
+# Set row names so we can make an spdf - borough & police regions
+row.names(bp_regions) = paste(bp_regions$b, bp_regions$id,
+                              bp_regions$p)
+
+# Set row names so we can make an spdf - borough & police & school regions
+row.names(bps_regions) = paste(bps_regions$b, bps_regions$id,
+                               bps_regions$p,
+                               bps_regions$s)
+
+
+# Set row names so we can make an spdf - borough & police & school & community regions
+row.names(bpsc_regions) = paste(bpsc_regions$b, bpsc_regions$id,
+                                bpsc_regions$p,
+                                bpsc_regions$s,
+                                bpsc_regions$c)
+
+# Left join all the  data files onto cps_bpsc_regions@data
+bp_regions = SpatialPolygonsDataFrame(bp,bp_regions)
+bps_regions = SpatialPolygonsDataFrame(bps,bps_regions)
+bpsc_regions = SpatialPolygonsDataFrame(bpsc,bpsc_regions)
 
 # Check that these both are 1 (data matches order of polygons)
-mean(rownames(cps_regions@data) == sapply(cps_regions@polygons, function(x) slot(x,"ID")))
-mean(rownames(cps_regions@data) == sapply(cps@polygons, function(x) slot(x,"ID")))
+mean(rownames(bp_regions@data) == sapply(bp_regions@polygons, function(x) slot(x,"ID")))
+mean(rownames(bp_regions@data) == sapply(bp@polygons, function(x) slot(x,"ID")))
+
+mean(rownames(bps_regions@data) == sapply(bps_regions@polygons, function(x) slot(x,"ID")))
+mean(rownames(bps_regions@data) == sapply(bps@polygons, function(x) slot(x,"ID")))
+
+mean(rownames(bpsc_regions@data) == sapply(bpsc_regions@polygons, function(x) slot(x,"ID")))
+mean(rownames(bpsc_regions@data) == sapply(bpsc@polygons, function(x) slot(x,"ID")))
 
 ############## Happy Score Calculation #############################
 
 # Join all the data into one table
-allYears <- cps_regions@data %>%
-  left_join(crimeData2,by=c("Precinct"="precinct")) %>%
+allYears <- bpsc_regions@data %>%
+  mutate(GEOID10 = as.numeric(GEOID10)) %>%
+  left_join(completeData,by=c("GEOID10"="GEO.id2")) %>%
+  left_join(crimeData2,by=c("Precinct"="precinct",
+                              "Year")) %>%
   left_join(edu,by=c("SchoolDist"="schooldist",
                      "Year")) %>%
   left_join(health,by=c("BoroCD"="cdCode",
                         "Year"="Year"))  %>%
-  mutate(GEOID10 = as.numeric(GEOID10)) %>%
-  left_join(completeData,by=c("GEOID10"="GEO.id2",
-                              "Year")) %>%
   filter(Year == 2014)
 
 # Create happy score index
-scaledBoroughs = cbind(data.frame(area = area(cps_regions)), allYears) %>%
+scaledBoroughs = cbind(data.frame(area = area(bpsc_regions)), allYears) %>%
   group_by(b) %>%
   summarise(crime = weighted.mean(-CrimeCount,w = area,na.rm=T),
             inc = weighted.mean(avgTotalHouseholdIncome2,w = area,na.rm=T),
@@ -485,3 +541,30 @@ ggplot(data=b2) +
                         breaks = seq(40000,120000,by=40000),
                         labels = paste0(seq(40,120,by=40),"K"),
                         range = c(1, 10))
+
+########## Three aggregate plots ########
+tempGEO <- c(filter(scaledBoroughs,Borough==2) %>% distinct(GEOID10))$GEOID10
+
+bp_aggregateMap <- merge(fortify(bp_regions), as.data.frame(bp_regions), by.x="id", by.y=0) %>%
+                    filter(GEOID10 %in% tempGEO)
+
+ggplot(bp_aggregateMap) +
+  # geom_polygon(aes(x=long,y=lat,group = group,color=b),
+  #              fill="#DCDCDC", size=1)+
+  geom_polygon(aes(x=long,y=lat,group = group,fill=b,color=as.factor(Precinct)),
+               size=1.5)+
+  coord_quickmap()+
+  theme_minimal()+
+  theme(axis.ticks = element_blank(),
+        axis.text.x = element_blank(), axis.title.x=element_blank(),
+        axis.text.y = element_blank(), axis.title.y=element_blank(),
+        panel.border = element_blank(), 
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        legend.position = "none",
+        plot.title = element_text(size=18, hjust=.5))
+
+
+
+
+

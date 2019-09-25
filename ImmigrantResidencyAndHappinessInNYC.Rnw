@@ -1,5 +1,8 @@
 \documentclass[11pt]{asaproc}
+
 \usepackage{graphicx}
+\usepackage{amsmath}
+
 \title{Immigrant Residency and Happiness in New York City}
 \newcommand*\samethanks[1][\value{footnote}]{\footnotemark[#1]}
 \author{Alison Tuiyott\thanks{Miami University Department of Statistics,  501 E High St, Oxford, OH 45056} \and Robert Garrett\samethanks \and Lydia Carter\samethanks \and Ben Schweitzer\samethanks \and  Thomas Fisher\samethanks\and  Karsten Maurer\samethanks}
@@ -110,9 +113,9 @@ fig3 <- ggplot(b2)+
   theme_special+
   #theme(legend.position = c(0.22,0.79))+
   scale_fill_gradient(name="Avg Total\nMonthly Rent",
-                    limits=c(800,2800),
-                    breaks=seq(800,2800,by=400),
-                    labels=c("$800",paste0("$",seq(1.2,2.8,by=.4),"K")),
+                    limits=c(800,3300),
+                    breaks=seq(880,3280,by=800),
+                    labels=c("<$900","$1.7K","$2.5K","$3.3K"),
                     high="#252525", low="#ffffff")+
   labs(caption="Figure 3: The average total monthly contract rent by sub-borough region.")
 @
@@ -219,15 +222,19 @@ ggarrange(fig1,fig2,fig3,fig4,fig5,fig6,
 
 \subsection{Aggregating the Data}
 
-The shape file data is provided by the New York City Department of City Planning. This website provides the shape file data for the Census blocks which is what is used in the NYCHVS data, school districts for education and community districts for health. The precinct shape files for the crime data are provided by New York City OpenData.
+The shape file data is provided by the New York City Department of City Planning. This website provides the shape file data for the Census blocks or sub-borough regions which is what is used in the NYCHVS data, school district regions for education and community district regions for health. The precinct shape files for the crime data are provided by New York City OpenData.
 
-Starting with the NYCHVS data, we use the \texttt{pumas} function in the \texttt{tigris} package in R to extract New York specific data [2]. We use the geoid's provided by the NYCHVS data to extract the necessary geoid's from the Public Use Microdata Area (PUMA) data. The data is read in and projected to the Long Island State Plane coordinate reference system. From there we can create an outline of New York City and the small sub-boroughs. 
+Starting with the NYCHVS data, we use the \texttt{pumas} function in the \texttt{tigris} package in R to extract New York specific data [2]. We use the geoid's provided by the NYCHVS data to extract the necessary geoid's from the Public Use Microdata Area (PUMA) data. The data is read in and projected to the Long Island State Plane coordinate reference system. From there we can create an outline of New York City and the unique sub-boroughs. For the purposes of explaining this process in greater detail, we will focus on Brooklyn. \textbf{Figure 7a} shows Brooklyn with its sub-boroughs outlined in black. We will refer to these unique sub-borough regions as $R_{i}$, where $i$ represents the region for the $i^{th}$ sub-borough. 
 
-In order to aggregate all of the different regions (Census blocks, police precincts, school districts, and community districts), we first remove all self intersections. To do this, we use the \texttt{gBuffer} function from the \texttt{rgeos} package in R to make the widths equal to zero[7]. We use the \texttt{gIntersection} function from the same package to intersect the four different regions[7]. At each intersection, we only keep the polygons we need. After the intersection is complete, we project the data back to the geographic coordinate system of longitude and latitudes.
+In order to aggregate all of the different regions (Census blocks, police precincts, school districts, and community districts), we first remove all self intersections. To do this, we use the \texttt{gBuffer} function from the \texttt{rgeos} package in R to make the widths equal to zero [7]. We use the \texttt{gIntersection} function from the same package to first intersect the sub-borough regions and the precinct regions. \textbf{Figure 7b} shows Brooklyn with its sub-boroughs outlined in black and precinct regions outlined in blue. We will refer to these unique sub-borough and precinct regions as $R_{ij}$, where $i$ represents the region for the $i^{th}$ sub-borough and $j$ represents the region for the $j^{th}$ precinct.
 
-After the intersections are complete, we return to the original four regions and extract the ID's for each dataset type by using the sapply function from base R. Every ID is unique for each polygon in the different regions (Census blocks, police precincts, etc.). We concatenate all four ID's to create a single ID for each unique polygon in the intersected data. We add this ID to the spatial polygon data frame. Using these ID's we can utilize the \texttt{SpatialPolygons} function from the sp package in R to left join all of the necessary data from the different regions to their respective polygons [6,8].
+Building off this combination, we follow the same process to intersect the sub-borough and precinct regions and the school district regions. \textbf{Figure 7c} shows Brooklyn with its sub-boroughs outlined in black, precinct regions outlined in blue, and school district regions outlined in orange. We will refer to these unique sub-borough, precinct and school district regions as $R_{ijk}$, where $i$ represents the region for the $i^{th}$ sub-borough, $j$ represents the region for the $j^{th}$ precinct, and $k$ represents the region for the $k^{th}$ school district.
 
-\textbf{Figure 7} overlays all the different geographic regions that are necessary to calculate the happiness score index. Each region has a unique combination of sub-borough, precinct, school district and community district.
+Building off the previous combination, we follow the same process to intersect the sub-borough, precinct, and school district regions and the community district regions. \textbf{Figure 7d} shows Brooklyn with its sub-boroughs outlined in black, precinct regions outlined in blue, school district regions outlined in orange, and community districts outlined in green. We will refer to these unique sub-borough, precinct, school district and community district regions as $R_{ijkl}$, where $i$ represents the region for the $i^{th}$ sub-borough, $j$ represents the region for the $j^{th}$ precinct, $k$ represents the region for the $k^{th}$ school district, and $l$ represents the region for the $l^{th}$ community district.
+
+After the intersections are complete, we project the data back to the geographic coordinate system of longitude and latitudes. We return to the original four regions and extract the ID's for each dataset type by using the sapply function from base R. Every ID is unique for each polygon in the different regions (sub-boroughs, police precincts, etc.). We concatenate all four ID's to create a single ID ($R_{ijkl}$) for each unique polygon in the intersected data. We add this ID to the spatial polygon data frame. Using these ID's we can utilize the \texttt{SpatialPolygons} function from the sp package in R to left join all of the necessary data from the different regions to their respective polygons [6,8].
+
+\textbf{Figure 7e} zooms in on a specific sub-borough in Brooklyn where we can notice all the different geographic regions that are necessary to calculate the happiness score index. Each region has a unique combination of sub-borough, precinct, school district and community district, $R_{ijkl}$.
 
 \begin{figure}[t]
 
