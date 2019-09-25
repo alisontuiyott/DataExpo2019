@@ -23,16 +23,16 @@ theme_special <-  theme_minimal()+
         panel.border = element_rect(colour='black', fill=NA), 
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
-        legend.key.size = unit(0.2, "cm"),
+        legend.key.size = unit(2.2, "cm"),
         legend.background = element_rect(colour = NA,fill=NA),
-        legend.text = element_text(size=6),
-        legend.title = element_text(size=8),
-        legend.position = c(0.18,0.79),
-        plot.title = element_text(size=10, hjust=.5))
+        legend.text = element_text(size=22),
+        legend.title = element_text(size=26),
+        legend.position = c(0.18,0.7),
+        plot.caption = element_text(size=22))
 @
 
 \begin{abstract}
-We explore the quality of life of immigrants in New York City through housing and neighborhood conditions by creating a happiness metric to measure a households' quality of life. Utilizing data provided by: the New York City Housing and Vacancy Survey (NYCHVS), the New York City Police Department, the New York City Department of Education, the New York City Department of Health and Mental Hygiene, along with reports from Happy City and the New Economics Foundation (HCNEF)[1], a happiness score was assigned to each sub-borough in New York City. This happiness score evaluated five main domains: work, place, community, education, and health. As a result of this analysis, we discovered higher happiness scores were associated with lower percentages of immigrant households.
+We explore the quality of life of immigrants in New York City through housing and neighborhood conditions by creating a happiness metric to measure a households' quality of life. Utilizing data provided by: the New York City Housing and Vacancy Survey (NYCHVS), the New York City Police Department, the New York City Department of Education, the New York City Department of Health and Mental Hygiene, along with reports from Happy City and the New Economics Foundation (HCNEF) [1], a happiness score was assigned to each sub-borough in New York City. This happiness score evaluated five main domains: work, place, community, education, and health. As a result of this analysis, we discovered higher happiness scores were associated with lower percentages of immigrant households.
 
 
 \begin{keywords}
@@ -43,10 +43,10 @@ Data Expo, Happiness Score, Immigrant Residency, New York City Housing and Vacan
 
 \section{Introduction \label{intro}}
 
-Many people around the globe venture to the United States seeking the American Dream. Some immigrants travel with hopes of a better quality of life. In this analysis, we use the data provided by the New York City Housing and Vacancy Survey (NYCHVS) to create a happiness metric to measure quality of life. According to the New York City Department of Housing Preservation and Development (HPD)[3]: \begin{quote} The NYCHVS is a representative survey of the New York City housing stock and population. It is the longest running housing survey in the country and is statutorily required. The Census Bureau has conducted the survey for the City since 1965. HPD is the only non-federal agency that sponsors a Census product. The HVS is a triennial survey with data collected about every three years. Each decade, a representative sample of housing units is selected, which represents the core sample.\end{quote} 
+Many people around the globe venture to the United States seeking the American Dream. Some immigrants travel with hopes of a better quality of life. In this analysis, we use the data provided by the New York City Housing and Vacancy Survey (NYCHVS) to create a happiness metric to measure quality of life. According to the New York City Department of Housing Preservation and Development (HPD) [5]: \begin{quote} The NYCHVS is a representative survey of the New York City housing stock and population. It is the longest running housing survey in the country and is statutorily required. The Census Bureau has conducted the survey for the City since 1965. HPD is the only non-federal agency that sponsors a Census product. The HVS is a triennial survey with data collected about every three years. Each decade, a representative sample of housing units is selected, which represents the core sample.\end{quote} 
 Our goal is to use this data to explore the quality of life of immigrants in New York City through housing and neighborhood conditions. Our results help guide individuals to understand more about immigrant households and how being in an immigrant household relates to their quality of life.
 
-To measure quality of life for New York City neighborhoods, we utilize a happiness metric. Happiness, according to HCNEF[1], is a city's success in providing the conditions that create `sustainable wellbeing'. Sustainable wellbeing is made up of five main domains: work, place, community, education, and health. According to the Happy City Index 2016 Report, the happiness metric,``aims to be a practical tool that can help local policymakers understand how well their city is doing in comparison to the other cities and prioritize key policy areas"[2]. Using the data from the housing surveys about immigrant residency, we attempt to find a connection between happiness and immigrant residency. 
+To measure quality of life for New York City neighborhoods, we utilize a happiness metric. Happiness, according to HCNEF [1], is a city's success in providing the conditions that create `sustainable wellbeing'. Sustainable wellbeing is made up of five main domains: work, place, community, education, and health. According to the Happy City Index 2016 Report, the happiness metric,``aims to be a practical tool that can help local policymakers understand how well their city is doing in comparison to the other cities and prioritize key policy areas" [3]. Using the data from the housing surveys about immigrant residency, we attempt to find a connection between happiness and immigrant residency. 
 
 \section{Data}
 
@@ -60,16 +60,16 @@ In the NYCHVS data, there is a field that identifies the place of the householde
 # Fig1: Plot Immigrant Residency
 fig1 <- ggplot(b2) +
   geom_polygon(aes(x=long,y=lat,fill=immigrantPct,group = group),
-               color="gray40",alpha=0.7)+ 
-  coord_quickmap()+
+               color="gray40",alpha=0.7,size=0.5)+ 
+  coord_quickmap()+ 
   geom_text(data= b_labels, aes(x=long, y=lat, label = name,fontface=2),
-            color="black",size=3)+
+            color="black",size=14)+
   theme_special+
   scale_fill_gradient(name="Immigrant\nResidency",limits=c(15,80),
                       breaks=seq(20,80,by=20),
                       labels=paste0(seq(20,80,by=20),"%"),
                       high="#6e016b", low="white")+
-  labs(caption="Figure 1")
+  labs(caption="Figure 1: The percentage of immigrant households by sub-borough region.")
 @
 
 \subsection{Work: Income}
@@ -78,43 +78,43 @@ In the NYCHVS data, there is a field that identifies total household income. We 
 
 <<Income 2014, echo=FALSE,cache=TRUE>>=
 # Plot Household Income
-fig2 <- ggplot(b2) +
+fig2 <- ggplot(b2)+
   geom_polygon(aes(x=long,y=lat,fill=avgTotalHouseholdIncome2,
-                   group = group),color="gray40",alpha=0.7)+ 
+                   group = group),color="gray40",alpha=0.7,size=0.5)+ 
   coord_quickmap()+
   geom_text(data= b_labels, aes(x=long, y=lat, label = name,fontface=2),
-            color="black",size=3)+
+            color="black",size=14)+
   theme_special+
-  theme(legend.position = c(0.26,0.79))+
+  #theme(legend.position = c(0.26,0.79))+
   scale_fill_gradient(name="Avg Total\nHousehold Income",
                     limits=c(30000,210000),
                     breaks=seq(30000,210000,by=45000),
                     labels=paste0("$",seq(30,210,by=45),"K"),
                     high="#005a32", low="white")+
-  labs(caption = "Figure 2")
+  labs(caption = "Figure 2: The average total household income by sub-borough region.")
 @
 
 \subsection{Place: Rent}
 
-In the NYCHVS data, there is a field that identifies monthly contract rent. Monthly contract rent is the total rent scheduled to be paid to the landlord[4]. We utilize this as a measure of \emph{place}. Using this field, we adjust for inflation and calculate the average monthly contract rent per sub-borough. \textbf{Figure 3} is a map of New York City illustrating the average monthly contract rent by sub-borough.
+In the NYCHVS data, there is a field that identifies monthly contract rent. Monthly contract rent is the total rent scheduled to be paid to the landlord [4]. We utilize this as a measure of \emph{place}. Using this field, we adjust for inflation and calculate the average monthly contract rent per sub-borough. \textbf{Figure 3} is a map of New York City illustrating the average monthly contract rent by sub-borough.
 
 <<Rent 2014, echo=FALSE,cache=TRUE>>=
 # Plot Monthly Contract Rent
-fig3 <- ggplot(b2) +
+fig3 <- ggplot(b2)+
   geom_polygon(aes(x=long,y=lat,fill=avgTotalMonthlyRent2,
-                   group = group),color="gray40",alpha=0.7)+
+                   group = group),color="gray40",alpha=0.7,size=0.5)+
   coord_quickmap()+
   theme_minimal()+
   geom_text(data= b_labels, aes(x=long, y=lat, label = name,fontface=2),
-            color="black",size=3)+
+            color="black",size=14)+
   theme_special+
-  theme(legend.position = c(0.22,0.79))+
+  #theme(legend.position = c(0.22,0.79))+
   scale_fill_gradient(name="Avg Total\nMonthly Rent",
                     limits=c(800,2800),
                     breaks=seq(800,2800,by=400),
                     labels=c("$800",paste0("$",seq(1.2,2.8,by=.4),"K")),
                     high="#252525", low="#ffffff")+
-  labs(caption="Figure 3")
+  labs(caption="Figure 3: The average total monthly contract rent by sub-borough region.")
 @
 
 \subsection{Community: Crime}
@@ -123,21 +123,21 @@ For a measure of the \emph{community}, we choose crime data provided by the New 
 
 <<Crime 2014, echo=FALSE,cache=TRUE>>=
 # Plot Crime data
-fig4 <- ggplot(crimePlot) +
+fig4 <- ggplot(crimePlot)+ 
   geom_polygon(aes(x=long,y=lat,fill=CrimeCount,group = group),
-               color="gray40",alpha=0.7)+
+               color="gray40",alpha=0.7,size=0.5)+
   coord_quickmap()+
   theme_minimal()+
   geom_text(data= b_labels, aes(x=long, y=lat, label = name,fontface=2),
-            color="black",size=3)+
-  theme_special+
-  theme(legend.position = c(0.26,0.79))+
+            color="black",size=14)+
+  theme_special+ 
+  #theme(legend.position = c(0.26,0.79))+
   scale_fill_gradient(name="Total Major\nFelony Offenses",
                       limits=c(80,3800),
                       breaks=seq(500,4000,by=1000),
                       labels=c("< 500","1,500","2,500","> 3,500"),
                       high="#cb181d", low="white")+
-  labs(caption = "Figure 4")
+  labs(caption = "Figure 4: The total number of major felony offenses by precinct region.")
 @
 
 \subsection{Education: High School Achievement Rates}
@@ -158,20 +158,20 @@ The education data is only available for cohorts that graduated from 2010 to 201
 
 <<Education 2014, echo=FALSE,cache=TRUE>>=
 # Plot Achievement Rate
-fig5 <- ggplot(eduPlot) +
+fig5 <- ggplot(eduPlot)+
   geom_polygon(aes(x=long,y=lat,fill=AchievedRate,group = group),
-               color="gray40",alpha=0.7)+
-  coord_quickmap()+
+               color="gray40",alpha=0.7,size=0.5)+
+  coord_quickmap()+ 
   theme_minimal()+
   geom_text(data= b_labels, aes(x=long, y=lat, label = name,fontface=2),
-            color="black",size=3)+
+            color="black",size=14)+ 
   theme_special+
   scale_fill_gradient(name="Achieved\nRate",
                       limits=c(0,0.6),
                       breaks=seq(0,0.6,by=0.2),
                       labels=paste0(seq(0,60,by=20),"%"),
                       high="#2171b5", low="white")+
-  labs(caption = "Figure 5")
+  labs(caption = "Figure 5: The rate of achievement of high school\ngraduates by school district region.")
 @
 
 \subsection{Health: Mortality Age Range}
@@ -188,27 +188,29 @@ The data ranges from 1999 to 2014. Since the NYCHVS data is collected every thre
 
 \begin{figure}
 
-<<Health 2014, echo=FALSE,cache=TRUE>>=
+<<Health 2014, echo=FALSE,cache=TRUE,fig.dim=c(24,33)>>=
 # Plot Median Death Age
-fig6 <- ggplot(cdPlot) +
+fig6 <- ggplot(cdPlot)+
   geom_polygon(aes(x=long,y=lat,fill=MedianDeathAge,group = group),
-               color="gray40",alpha=0.7)+
-  coord_quickmap()+
+               color="gray40",alpha=0.7,size=0.5)+
+  coord_quickmap()+ 
   theme_minimal()+
   geom_text(data= b_labels, aes(x=long, y=lat, label = name,fontface=2),
-            color="black",size=3)+
-  theme_special+
-  theme(legend.position = c(0.22,0.77))+
+            color="black",size=14)+
+  theme_special+ 
+  #theme(legend.position = c(0.22,0.77))+
   scale_fill_manual(name="Median Death\nAge Range",
                     breaks=c("Age_65_69","Age_70_74",
                              "Age_75_79","Age_80_84",NA),
                     labels=c("65-69","70-74","75-79","80-84","NA"),
                     values = c("#fed98e","#fe9929","#d95f0e",
                                "#993404","white"))+
-  labs(caption = "Figure 6")
+  labs(caption = "Figure 6: The median death age range by community district region.")
 
-#grid.arrange(fig1,fig2,widths=c(6,6),nrow=3,ncol=2)
-ggarrange(fig1,fig2,fig3,fig4,fig5,fig6,widths=c(3,3),heights=c(2,2,2),nrow=3,ncol=2)
+# Plot all of the plots together.
+ggarrange(fig1,fig2,fig3,fig4,fig5,fig6,
+          widths=c(3,3),heights=c(2,2,2), 
+          nrow=3,ncol=2)
 @
 
 \end{figure}
@@ -219,11 +221,11 @@ ggarrange(fig1,fig2,fig3,fig4,fig5,fig6,widths=c(3,3),heights=c(2,2,2),nrow=3,nc
 
 The shape file data is provided by the New York City Department of City Planning. This website provides the shape file data for the Census blocks which is what is used in the NYCHVS data, school districts for education and community districts for health. The precinct shape files for the crime data are provided by New York City OpenData.
 
-Starting with the NYCHVS data, we use the \texttt{pumas} function in the \texttt{tigris} package in R to extract New York specific data[5]. We use the geoid's provided by the NYCHVS data to extract the necessary geoid's from the Public Use Microdata Area (PUMA) data. The data is read in and projected to the Long Island State Plane coordinate reference system. From there we can create an outline of New York City and the small sub-boroughs. 
+Starting with the NYCHVS data, we use the \texttt{pumas} function in the \texttt{tigris} package in R to extract New York specific data [2]. We use the geoid's provided by the NYCHVS data to extract the necessary geoid's from the Public Use Microdata Area (PUMA) data. The data is read in and projected to the Long Island State Plane coordinate reference system. From there we can create an outline of New York City and the small sub-boroughs. 
 
-In order to aggregate all of the different regions (Census blocks, police precincts, school districts, and community districts), we first remove all self intersections. To do this, we use the \texttt{gBuffer} function from the \texttt{rgeos} package in R to make the widths equal to zero[6]. We use the \texttt{gIntersection} function from the same package to intersect the four different regions[6]. At each intersection, we only keep the polygons we need. After the intersection is complete, we project the data back to the geographic coordinate system of longitude and latitudes.
+In order to aggregate all of the different regions (Census blocks, police precincts, school districts, and community districts), we first remove all self intersections. To do this, we use the \texttt{gBuffer} function from the \texttt{rgeos} package in R to make the widths equal to zero[7]. We use the \texttt{gIntersection} function from the same package to intersect the four different regions[7]. At each intersection, we only keep the polygons we need. After the intersection is complete, we project the data back to the geographic coordinate system of longitude and latitudes.
 
-After the intersections are complete, we return to the original four regions and extract the ID's for each dataset type by using the sapply function from base R. Every ID is unique for each polygon in the different regions (Census blocks, police precincts, etc.). We concatenate all four ID's to create a single ID for each unique polygon in the intersected data. We add this ID to the spatial polygon data frame. Using these ID's we can utilize the \texttt{SpatialPolygons} function from the sp package in R to left join all of the necessary data from the different regions to their respective polygons[7,8].
+After the intersections are complete, we return to the original four regions and extract the ID's for each dataset type by using the sapply function from base R. Every ID is unique for each polygon in the different regions (Census blocks, police precincts, etc.). We concatenate all four ID's to create a single ID for each unique polygon in the intersected data. We add this ID to the spatial polygon data frame. Using these ID's we can utilize the \texttt{SpatialPolygons} function from the sp package in R to left join all of the necessary data from the different regions to their respective polygons [6,8].
 
 \textbf{Figure 7} overlays all the different geographic regions that are necessary to calculate the happiness score index. Each region has a unique combination of sub-borough, precinct, school district and community district.
 
@@ -392,32 +394,33 @@ In this analysis, we utilized the NYCHVS data and other external resources to cr
 \itemsep=0pt
 {
 \item 
-[1] "Happy City Index." What Works Centre for Wellbeing, 27 Oct. 2014, whatworkswellbeing.org/case-study/happy-city-index/.
+[1)] "Happy City Index." What Works Centre for Wellbeing, 27 Oct. 2014, whatworkswellbeing.org/case-study/happy-city-index/.
 
 \item 
-[2] Lewis, Sam Wren, and Saamah Abdallah. Happy City Index 2016 Report. Happy City Measurement and Policy Team, 2016, Happy City Index 2016 Report, www.happycity.org.uk/wp-content/uploads/2016/10/Happy-City-Index-2016-Report-FINAL.pdf.
-
-\item 
-[3] "NYCHVS in the ASA Data Challenge Expo." NYCHVS in the ASA Data Challenge Expo, New York City Housing and Vacancy Survey, 2019, www1.nyc.gov/site/hpd/about/nychvs-asa-data-challenge-expo.page.
-
-\item 
-[4] "NYCHVS Glossary." US Census Bureau, New York City Housing and Vacancy Survey, 2008, www2.census.gov/programs-surveys/nychvs/about/glossary/gloss08.pdf.
-
-\item 
-[5] Kyle Walker (2018). tigris: Load Census TIGER/Line Shapefiles. R
+[2)]  Kyle Walker (2018). tigris: Load Census TIGER/Line Shapefiles. R
   package version 0.7. https://CRAN.R-project.org/package=tigris
-  
+
 \item 
-[6] Roger Bivand and Colin Rundel (2018). rgeos: Interface to Geometry
+[3)] Lewis, Sam Wren, and Saamah Abdallah. Happy City Index 2016 Report. Happy City Measurement and Policy Team, 2016, Happy City Index 2016 Report, www.happycity.org.uk/wp-content/uploads/2016/10/Happy-City-Index-2016-Report-FINAL.pdf.
+
+\item 
+[4)] "NYCHVS Glossary." US Census Bureau, New York City Housing and Vacancy Survey, 2008, www2.census.gov/programs-surveys/nychvs/about/glossary/gloss08.pdf.
+
+\item 
+[5)] "NYCHVS in the ASA Data Challenge Expo." NYCHVS in the ASA Data Challenge Expo, New York City Housing and Vacancy Survey, 2019, www1.nyc.gov/site/hpd/about/nychvs-asa-data-challenge-expo.page.
+
+
+\item 
+[6)]  Pebesma, E.J., R.S. Bivand, 2005. Classes and methods for spatial data
+  in R. R News 5 (2), https://cran.r-project.org/doc/Rnews/.
+
+\item 
+[7)] Roger Bivand and Colin Rundel (2018). rgeos: Interface to Geometry
   Engine - Open Source ('GEOS'). R package version 0.4-2.
   https://CRAN.R-project.org/package=rgeos
 
 \item 
-[7] Pebesma, E.J., R.S. Bivand, 2005. Classes and methods for spatial data
-  in R. R News 5 (2), https://cran.r-project.org/doc/Rnews/.
-
-\item 
-[8] Roger S. Bivand, Edzer Pebesma, Virgilio Gomez-Rubio, 2013. Applied
+[8)] Roger S. Bivand, Edzer Pebesma, Virgilio Gomez-Rubio, 2013. Applied
   spatial data analysis with R, Second edition. Springer, NY.
   http://www.asdar-book.org/
 }
