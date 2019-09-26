@@ -387,7 +387,11 @@ b_labels<- left_join(b_labels,nycBoroughs,by=c("Borough"="dataCode")) %>%
 
 # Save the data
 #save.image(file="CleanedData_Sep15.Rdata")
-load("CleanedData_Sep15.Rdata")
+#load("CleanedData_Sep15.Rdata")
+
+# Edited 9/25 data
+#save.image(file="CleanedData_Sep25.Rdata")
+load("CleanedData_Sep25.Rdata")
 
 # Plot Immigrant Residency, Happiness, Household Income, and Rent
 ggplot(b2) +
@@ -419,19 +423,19 @@ ggplot(b2) +
 # Plot Crime
 crime <- data.frame(crimeData2) %>%
   filter(Year==2014) 
-police = gBuffer(police, byid = TRUE, width = 0)
-police = spTransform(police,CRS("+proj=longlat +ellps=WGS84 +datum=WGS84"))
+policeMap = gBuffer(police, byid = TRUE, width = 0)
+policeMap = spTransform(policeMap,CRS("+proj=longlat +ellps=WGS84 +datum=WGS84"))
 
 # Change the row names of the policeMap to precinct
-row.names(police@data) = as.character(police@data$Precinct)
+row.names(policeMap@data) = as.character(policeMap@data$Precinct)
 row.names(crime) = as.character(0:76)
 
 # Left join all the  data files onto police@data 
-police <- SpatialPolygonsDataFrame(police,crime)
-mean(rownames(police@data) == sapply(police@polygons, function(x) slot(x,"ID")))
-mean(rownames(police@data) == sapply(police@polygons, function(x) slot(x,"ID")))
+policeMap <- SpatialPolygonsDataFrame(policeMap,crime)
+mean(rownames(policeMap@data) == sapply(policeMap@polygons, function(x) slot(x,"ID")))
+mean(rownames(policeMap@data) == sapply(policeMap@polygons, function(x) slot(x,"ID")))
 
-crimePlot <- merge(fortify(police), as.data.frame(police), by.x="id", by.y=0)
+crimePlot <- merge(fortify(policeMap), as.data.frame(policeMap), by.x="id", by.y=0)
 
 # Plot Crime data
 ggplot(crimePlot) +
@@ -454,12 +458,12 @@ ggplot(crimePlot) +
 # Plot Education
 edu2 <- data.frame(edu) %>%
   filter(Year==2014)
-school = gBuffer(school, byid = TRUE, width = 0)
-school = spTransform(school,CRS("+proj=longlat +ellps=WGS84 +datum=WGS84"))
+schoolMap = gBuffer(school, byid = TRUE, width = 0)
+schoolMap = spTransform(schoolMap,CRS("+proj=longlat +ellps=WGS84 +datum=WGS84"))
 
 # Left join all the  data files onto police@data 
-school@data <- left_join(school@data,edu2,by=c("SchoolDist" = "schooldist"))
-eduPlot <- merge(fortify(school), as.data.frame(school), by.x="id", by.y=0)
+schoolMap@data <- left_join(schoolMap@data,edu2,by=c("SchoolDist" = "schooldist"))
+eduPlot <- merge(fortify(schoolMap), as.data.frame(schoolMap), by.x="id", by.y=0)
 ggplot(eduPlot) +
   geom_polygon(aes(x=long,y=lat,fill=AchievedRate,group = group),color="gray40",alpha=0.7)+
   coord_quickmap()+
@@ -482,13 +486,13 @@ health2 <- data.frame(health) %>%
   filter(Year==2014) %>%
   mutate(MedianDeathAge = as.character(MedianDeathAge),
          MedianDeathAge = as.factor(MedianDeathAge))
-community = gBuffer(community, byid = TRUE, width = 0)
-community = spTransform(community,CRS("+proj=longlat +ellps=WGS84 +datum=WGS84"))
+communityMap = gBuffer(community, byid = TRUE, width = 0)
+communityMap = spTransform(communityMap,CRS("+proj=longlat +ellps=WGS84 +datum=WGS84"))
 row.names(health2) = as.character(health2$cdCode)
 
 #left join all the  data files onto police@data 
-community@data <- left_join(community@data,health2,by=c("BoroCD" = "cdCode"))
-cdPlot <- merge(fortify(community), as.data.frame(community), by.x="id", by.y=0)
+communityMap@data <- left_join(communityMap@data,health2,by=c("BoroCD" = "cdCode"))
+cdPlot <- merge(fortify(communityMap), as.data.frame(communityMap), by.x="id", by.y=0)
 ggplot(cdPlot) +
   geom_polygon(aes(x=long,y=lat,fill=MedianDeathAge,group = group),color="gray40",alpha=0.7)+
   coord_quickmap()+
@@ -508,20 +512,20 @@ ggplot(cdPlot) +
                     values = c("#fed98e","#fe9929","#d95f0e","#993404","white"))
 
 # Plot aggregate data
-aggregateMap <- merge(fortify(cps_regions), as.data.frame(cps_regions), by.x="id", by.y=0)
-ggplot(aggregateMap) +
-  geom_polygon(aes(x=long,y=lat,group = group),fill="#dfc27d",color="gray20",alpha=0.7)+
-  coord_quickmap()+
-  theme_minimal()+
-  geom_text(data= b_labels, aes(x=long, y=lat, label = name,fontface=2),color="black",size=5)+
-  theme(axis.ticks = element_blank(),
-        axis.text.x = element_blank(), axis.title.x=element_blank(),
-        axis.text.y = element_blank(), axis.title.y=element_blank(),
-        panel.border = element_blank(), 
-        panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(),
-        legend.background = element_rect(colour = "gray20"),
-        plot.title = element_text(size=18, hjust=.5))
+# aggregateMap <- merge(fortify(cps_regions), as.data.frame(cps_regions), by.x="id", by.y=0)
+# ggplot(aggregateMap) +
+#   geom_polygon(aes(x=long,y=lat,group = group),fill="#dfc27d",color="gray20",alpha=0.7)+
+#   coord_quickmap()+
+#   theme_minimal()+
+#   geom_text(data= b_labels, aes(x=long, y=lat, label = name,fontface=2),color="black",size=5)+
+#   theme(axis.ticks = element_blank(),
+#         axis.text.x = element_blank(), axis.title.x=element_blank(),
+#         axis.text.y = element_blank(), axis.title.y=element_blank(),
+#         panel.border = element_blank(), 
+#         panel.grid.major = element_blank(), 
+#         panel.grid.minor = element_blank(),
+#         legend.background = element_rect(colour = "gray20"),
+#         plot.title = element_text(size=18, hjust=.5))
 
 ########## Scatter plot ########
 
@@ -545,8 +549,10 @@ ggplot(data=b2) +
 ########## Three aggregate plots ########
 
 # Select Brooklyn geo id's
-brooklyn_geo <- c(3604003, 3604002, 3604018, 3604006, 3604008, 3604014, 3604010, 3604016, 3604017,
-             3604007, 3604009, 3604015, 3604011, 3604012, 3604005, 3604013, 3604004, 3604001)
+brooklyn_geo <- c(3604003, 3604002, 3604018, 3604006, 3604008, 3604014, 
+                  3604010, 3604016, 3604017,
+                  3604007, 3604009, 3604015, 3604011, 3604012, 
+                  3604005, 3604013, 3604004, 3604001)
 brooklyn_aggregate <- merge(fortify(bpsc_regions), 
                           as.data.frame(bpsc_regions), by.x="id", by.y=0) %>%
                     filter(GEOID10 %in% brooklyn_geo)
@@ -560,25 +566,25 @@ b_bMap <- merge(fortify(borough),
 
 b_pMap <- merge(fortify(police), 
                 as.data.frame(police), by.x="id", by.y=0) %>%
-          filter(p %in% brooklyn_p)
+          filter(p %in% brooklyn_p, Precinct < 100) 
 
 b_sMap <- merge(fortify(school), 
                 as.data.frame(school), by.x="id", by.y=0) %>%
-          filter(s %in% brooklyn_s)
+          filter(s %in% brooklyn_s, !SchoolDist %in% c(24,27))
 
 b_cMap <- merge(fortify(community), 
                 as.data.frame(community), by.x="id", by.y=0) %>%
-          filter(c %in% brooklyn_c)
+          filter(c %in% brooklyn_c, BoroCD < 400)
 
 ggplot() +
   geom_polygon(data=b_bMap,aes(x=long,y=lat,group = group),
-               color="#1f78b4", fill="white", size=0.7)+
+               color="#1f78b4", fill="white", size=0.7)+ # blue
   geom_polygon(data=b_pMap,aes(x=long,y=lat,group = group),
-               color="#33a02c",fill=NA,size=0.7)+
+               color="#33a02c",fill=NA,size=0.7)+ # green
   geom_polygon(data=b_sMap,aes(x=long,y=lat,group = group),
-               color="#d7191c",fill=NA,size=0.7)+
+               color="#d7191c",fill=NA,size=0.7)+ # red
   geom_polygon(data=b_cMap,aes(x=long,y=lat,group = group),
-               color="#fdae61",fill=NA,size=0.8)+
+               color="#fdae61",fill=NA,size=0.7)+ # orange
   coord_equal()+
   theme_minimal()+
   theme(axis.ticks = element_blank(),
@@ -590,6 +596,9 @@ ggplot() +
         legend.position = "none",
         plot.title = element_text(size=18, hjust=.5))
 
+# Save the data for the paper
+#save.image(file="CleanedData_Sep25.Rdata")
+load(file="CleanedData_Sep25.Rdata")
 
 # Use sub-borough 71 to zoom in on specific pieces
 
