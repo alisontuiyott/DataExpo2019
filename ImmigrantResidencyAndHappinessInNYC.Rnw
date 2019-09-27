@@ -14,7 +14,7 @@ library(pacman)
 p_load(ggplot2,Stack,dplyr,ggrepel,gridExtra,tidyr,
        leaflet,plotly,readxl,rgdal,tigris,rgdal,rgeos,
        maptools,sp,scales,stringr,raster,grid,gtable,egg,RColorBrewer)
-load("C:/Users/POA5/Documents/MiamiAlison3/ASA_Comp/CleanedData_Sep15.Rdata")
+load("C:/Users/POA5/Documents/MiamiAlison3/ASA_Comp/CleanedData_Sep25.Rdata")
 
 # Set grid theme
 theme_special <-  theme_minimal()+
@@ -26,12 +26,12 @@ theme_special <-  theme_minimal()+
         panel.border = element_rect(colour='black', fill=NA), 
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
-        legend.key.size = unit(2.2, "cm"),
+        legend.key.size = unit(1.2, "cm"),
         legend.background = element_rect(colour = NA,fill=NA),
         legend.text = element_text(size=22),
         legend.title = element_text(size=26),
         legend.position = c(0.18,0.7),
-        plot.caption = element_text(size=22))
+        plot.caption = element_text(size=12))
 @
 
 \begin{abstract}
@@ -61,12 +61,12 @@ In the NYCHVS data, there is a field that identifies the place of the householde
 
 <<Immigrant Residency 2014, echo=FALSE,cache=TRUE>>=
 # Fig1: Plot Immigrant Residency
-fig1 <- ggplot(b2) +
+fig1 <- ggplot(b2) + 
   geom_polygon(aes(x=long,y=lat,fill=immigrantPct,group = group),
                color="gray40",alpha=0.7,size=0.5)+ 
-  coord_quickmap()+ 
+  coord_quickmap()+    
   geom_text(data= b_labels, aes(x=long, y=lat, label = name,fontface=2),
-            color="black",size=14)+
+            color="black",size=12)+
   theme_special+
   scale_fill_gradient(name="Immigrant\nResidency",limits=c(15,80),
                       breaks=seq(20,80,by=20),
@@ -81,14 +81,14 @@ In the NYCHVS data, there is a field that identifies total household income. We 
 
 <<Income 2014, echo=FALSE,cache=TRUE>>=
 # Plot Household Income
-fig2 <- ggplot(b2)+
+fig2 <- ggplot(b2)+  
   geom_polygon(aes(x=long,y=lat,fill=avgTotalHouseholdIncome2,
                    group = group),color="gray40",alpha=0.7,size=0.5)+ 
-  coord_quickmap()+
+  coord_quickmap()+ 
   geom_text(data= b_labels, aes(x=long, y=lat, label = name,fontface=2),
-            color="black",size=14)+
-  theme_special+
-  #theme(legend.position = c(0.26,0.79))+
+            color="black",size=12)+
+  theme_special+ 
+  theme(legend.position = c(0.25,0.68))+
   scale_fill_gradient(name="Avg Total\nHousehold Income",
                     limits=c(30000,210000),
                     breaks=seq(30000,210000,by=45000),
@@ -106,10 +106,10 @@ In the NYCHVS data, there is a field that identifies monthly contract rent. Mont
 fig3 <- ggplot(b2)+
   geom_polygon(aes(x=long,y=lat,fill=avgTotalMonthlyRent2,
                    group = group),color="gray40",alpha=0.7,size=0.5)+
-  coord_quickmap()+
-  theme_minimal()+
+  coord_quickmap()+   
+  theme_minimal()+ 
   geom_text(data= b_labels, aes(x=long, y=lat, label = name,fontface=2),
-            color="black",size=14)+
+            color="black",size=12)+
   theme_special+
   #theme(legend.position = c(0.22,0.79))+
   scale_fill_gradient(name="Avg Total\nMonthly Rent",
@@ -129,12 +129,12 @@ For a measure of the \emph{community}, we choose crime data provided by the New 
 fig4 <- ggplot(crimePlot)+ 
   geom_polygon(aes(x=long,y=lat,fill=CrimeCount,group = group),
                color="gray40",alpha=0.7,size=0.5)+
-  coord_quickmap()+
-  theme_minimal()+
+  coord_quickmap()+ 
+  theme_minimal()+  
   geom_text(data= b_labels, aes(x=long, y=lat, label = name,fontface=2),
-            color="black",size=14)+
-  theme_special+ 
-  #theme(legend.position = c(0.26,0.79))+
+            color="black",size=12)+
+  theme_special+  
+  theme(legend.position = c(0.25,0.68))+
   scale_fill_gradient(name="Total Major\nFelony Offenses",
                       limits=c(80,3800),
                       breaks=seq(500,4000,by=1000),
@@ -164,10 +164,10 @@ The education data is only available for cohorts that graduated from 2010 to 201
 fig5 <- ggplot(eduPlot)+
   geom_polygon(aes(x=long,y=lat,fill=AchievedRate,group = group),
                color="gray40",alpha=0.7,size=0.5)+
-  coord_quickmap()+ 
+  coord_quickmap()+   
   theme_minimal()+
   geom_text(data= b_labels, aes(x=long, y=lat, label = name,fontface=2),
-            color="black",size=14)+ 
+            color="black",size=12)+ 
   theme_special+
   scale_fill_gradient(name="Achieved\nRate",
                       limits=c(0,0.6),
@@ -190,8 +190,7 @@ From here, we select the oldest age range that contains our average number of de
 The data ranges from 1999 to 2014. Since the NYCHVS data is collected every three years, we only selected years that overlapped with the NYCHVS data. \textbf{Figure 6} is a map of New York City illustrating the median death age range by community district.
 
 \begin{figure}
-
-<<Health 2014, echo=FALSE,cache=TRUE,fig.dim=c(24,33)>>=
+<<Health 2014, echo=FALSE,cache=TRUE,fig.dim=c(16,22)>>=
 # Plot Median Death Age
 fig6 <- ggplot(cdPlot)+
   geom_polygon(aes(x=long,y=lat,fill=MedianDeathAge,group = group),
@@ -199,8 +198,8 @@ fig6 <- ggplot(cdPlot)+
   coord_quickmap()+ 
   theme_minimal()+
   geom_text(data= b_labels, aes(x=long, y=lat, label = name,fontface=2),
-            color="black",size=14)+
-  theme_special+ 
+            color="black",size=12)+
+  theme_special+     
   #theme(legend.position = c(0.22,0.77))+
   scale_fill_manual(name="Median Death\nAge Range",
                     breaks=c("Age_65_69","Age_70_74",
@@ -212,10 +211,9 @@ fig6 <- ggplot(cdPlot)+
 
 # Plot all of the plots together.
 ggarrange(fig1,fig2,fig3,fig4,fig5,fig6,
-          widths=c(3,3),heights=c(2,2,2), 
+          widths=c(3,3),heights=c(1.5,1.5,1.5), 
           nrow=3,ncol=2)
 @
-
 \end{figure}
 
 \section{Methods}
@@ -224,46 +222,96 @@ ggarrange(fig1,fig2,fig3,fig4,fig5,fig6,
 
 The shape file data is provided by the New York City Department of City Planning. This website provides the shape file data for the Census blocks or sub-borough regions which is what is used in the NYCHVS data, school district regions for education and community district regions for health. The precinct shape files for the crime data are provided by New York City OpenData.
 
-Starting with the NYCHVS data, we use the \texttt{pumas} function in the \texttt{tigris} package in R to extract New York specific data [2]. We use the geoid's provided by the NYCHVS data to extract the necessary geoid's from the Public Use Microdata Area (PUMA) data. The data is read in and projected to the Long Island State Plane coordinate reference system. From there we can create an outline of New York City and the unique sub-boroughs. For the purposes of explaining this process in greater detail, we will focus on Brooklyn. \textbf{Figure 7a} shows Brooklyn with its sub-boroughs outlined in black. We will refer to these unique sub-borough regions as $R_{i}$, where $i$ represents the region for the $i^{th}$ sub-borough. 
+Starting with the NYCHVS data, we use the \texttt{pumas} function in the \texttt{tigris} package in R to extract New York specific data [2]. We use the geoid's provided by the NYCHVS data to extract the necessary geoid's from the Public Use Microdata Area (PUMA) data. The data is read in and projected to the Long Island State Plane coordinate reference system. From there we can create an outline of New York City and the unique sub-boroughs. For the purposes of explaining this process in greater detail, we focus on Brooklyn. \textbf{Figure 7a} shows Brooklyn with its sub-boroughs outlined in red. We refer to these unique sub-borough regions as $R_{i}$, where $i$ represents the region for the $i^{th}$ sub-borough. 
 
-In order to aggregate all of the different regions (Census blocks, police precincts, school districts, and community districts), we first remove all self intersections. To do this, we use the \texttt{gBuffer} function from the \texttt{rgeos} package in R to make the widths equal to zero [7]. We use the \texttt{gIntersection} function from the same package to first intersect the sub-borough regions and the precinct regions. \textbf{Figure 7b} shows Brooklyn with its sub-boroughs outlined in black and precinct regions outlined in blue. We will refer to these unique sub-borough and precinct regions as $R_{ij}$, where $i$ represents the region for the $i^{th}$ sub-borough and $j$ represents the region for the $j^{th}$ precinct.
+In order to aggregate all of the different regions (sub-boroughs, police precincts, school districts, and community districts), we first remove all self intersections. To do this, we use the \texttt{gBuffer} function from the \texttt{rgeos} package in R to make the widths equal to zero [7]. We use the \texttt{gIntersection} function from the same package to first intersect the sub-borough regions and the precinct regions. \textbf{Figure 7b} shows Brooklyn with its sub-boroughs outlined in red and precinct regions outlined in blue. We refer to these unique sub-borough and precinct regions as $R_{ij}$, where $i$ represents the region for the $i^{th}$ sub-borough and $j$ represents the region for the $j^{th}$ precinct.
 
-Building off this combination, we follow the same process to intersect the sub-borough and precinct regions and the school district regions. \textbf{Figure 7c} shows Brooklyn with its sub-boroughs outlined in black, precinct regions outlined in blue, and school district regions outlined in orange. We will refer to these unique sub-borough, precinct and school district regions as $R_{ijk}$, where $i$ represents the region for the $i^{th}$ sub-borough, $j$ represents the region for the $j^{th}$ precinct, and $k$ represents the region for the $k^{th}$ school district.
+Building off this combination, we follow the same process to intersect the sub-borough and precinct regions and the school district regions. \textbf{Figure 7c} shows Brooklyn with its sub-boroughs outlined in red, precinct regions outlined in blue, and school district regions outlined in orange. We refer to these unique sub-borough, precinct and school district regions as $R_{ijk}$, where $i$ represents the region for the $i^{th}$ sub-borough, $j$ represents the region for the $j^{th}$ precinct, and $k$ represents the region for the $k^{th}$ school district.
 
-Building off the previous combination, we follow the same process to intersect the sub-borough, precinct, and school district regions and the community district regions. \textbf{Figure 7d} shows Brooklyn with its sub-boroughs outlined in black, precinct regions outlined in blue, school district regions outlined in orange, and community districts outlined in green. We will refer to these unique sub-borough, precinct, school district and community district regions as $R_{ijkl}$, where $i$ represents the region for the $i^{th}$ sub-borough, $j$ represents the region for the $j^{th}$ precinct, $k$ represents the region for the $k^{th}$ school district, and $l$ represents the region for the $l^{th}$ community district.
+Continuing the previous combination, we follow the same process to intersect the sub-borough, precinct, and school district regions and the community district regions. \textbf{Figure 7d} shows Brooklyn with its sub-boroughs outlined in red, precinct regions outlined in blue, school district regions outlined in orange, and community districts outlined in purple. We refer to these unique sub-borough, precinct, school district and community district regions as $R_{ijkl}$, where $i$ represents the region for the $i^{th}$ sub-borough, $j$ represents the region for the $j^{th}$ precinct, $k$ represents the region for the $k^{th}$ school district, and $l$ represents the region for the $l^{th}$ community district.
 
-After the intersections are complete, we project the data back to the geographic coordinate system of longitude and latitudes. We return to the original four regions and extract the ID's for each dataset type by using the sapply function from base R. Every ID is unique for each polygon in the different regions (sub-boroughs, police precincts, etc.). We concatenate all four ID's to create a single ID ($R_{ijkl}$) for each unique polygon in the intersected data. We add this ID to the spatial polygon data frame. Using these ID's we can utilize the \texttt{SpatialPolygons} function from the sp package in R to left join all of the necessary data from the different regions to their respective polygons [6,8].
+After the intersections are complete, we project the data back to the geographic coordinate system of longitudes and latitudes. We return to the original four regions and extract the ID's for each dataset type by using the sapply function from base R. Every ID is unique for each polygon in the different regions (sub-boroughs, police precincts, etc.). We concatenate all four ID's to create a single ID ($R_{ijkl}$) for each unique polygon in the intersected data. We add this ID to the spatial polygon data frame. Using these ID's we can utilize the \texttt{SpatialPolygons} function from the sp package in R to left join all of the necessary data from the different regions to their respective polygons [6,8].
 
-\textbf{Figure 7e} zooms in on a specific sub-borough in Brooklyn where we can notice all the different geographic regions that are necessary to calculate the happiness score index. Each region has a unique combination of sub-borough, precinct, school district and community district, $R_{ijkl}$.
+\textbf{Figure 7e} zooms in on a specific sub-borough in Brooklyn where we can notice all the different geographic regions that are necessary to calculate the happiness score index. Each region has a unique combination of sub-borough, precinct, school district and community district regions, $R_{ijkl}$.
 
 \begin{figure}[t]
 
 <<Aggregate 2014, echo=FALSE,cache=TRUE>>=
-# Plot Aggregate Data for Brooklyn
-tempGEO <- c(filter(scaledBoroughs,Borough==2) %>% 
-               distinct(GEOID10))$GEOID10
-tempAggregateMap <- filter(aggregateMap, GEOID10 %in% tempGEO)
-
-ggplot(tempAggregateMap) +
-  geom_polygon(aes(x=long,y=lat,group = group),
-               fill="#dfc27d",color="gray20",alpha=0.3)+
-  coord_quickmap()+
+# Plot aggregate data for Brooklyn, starting with sub-borough regions
+agg1 <- ggplot() +
+  geom_polygon(data=b_bMap,aes(x=long,y=lat,group = group),
+               color="#e41a1c", fill="white", size=0.7)+ # dark red
+  coord_equal()+
   theme_minimal()+
   theme_special+
-  theme(legend.key.size = unit(1.2, "cm"),
-        plot.title = element_text(size=18),
-        legend.text = element_text(size=11),
-        legend.title = element_text(size=12),
-        legend.position = "none")+
-  labs(title = "Brooklyn Aggregate Data",
-       caption = "Figure 7")
+  theme(legend.position = "none",
+        plot.caption = element_text(size=6))+
+  labs(caption =  bquote("Figure 7a: Region "~R[i]~ " of sub-borough regions in red."))
+
+# Add the police precinct regions in dark blue
+agg2 <- agg1 + 
+        geom_polygon(data=b_pMap,aes(x=long,y=lat,group = group),
+                    color="#377eb8",fill=NA,size=0.7)+ # dark blue 
+        labs(caption = expression(atop(paste("Figure 7b: Region "~R[ij]~ "of sub-borough and"), "precinct regions in red and blue, respectively.")))
+
+# Add the school district regions in orange
+agg3 <- agg2 + 
+        geom_polygon(data=b_sMap,aes(x=long,y=lat,group = group),
+               color="#ff7f00",fill=NA,size=0.7)+ # orange
+        labs(caption = expression(atop(paste("Figure 7c: Region "~R[ijk]~ "of sub-borough, precinct and school,"),"district regions in red, blue and orange, respectively.")))
+
+# Add the community district regions in purple
+agg4 <- agg3 + 
+        geom_polygon(data=b_cMap,aes(x=long,y=lat,group = group),
+               color="#984ea3",fill=NA,size=0.7)+ # purple
+        labs(caption = expression(atop(paste("Figure 7d: Region "~R[ijkl]~ "of sub-borough, precinct, school district, and,"), "community district regions in red, blue, orange, and purple, respectively.")))
+
+# Plot all of the plots together.
+ggarrange(agg1,agg2,agg3,agg4,
+          widths=c(4,4),heights=c(3,3), 
+          nrow=2,ncol=2)
 @
 
 \end{figure}
 
+\begin{figure}[t]
+
+<<Brooklyn Aggregate 2014, echo=FALSE,cache=TRUE,fig.dim=c(16,7)>>=
+# Filter to only one sub-borough in Brooklyn 
+tempB <- b_bMap %>% filter(GEOID10 == 3604011)
+tempP <- b_pMap %>% filter(Precinct %in% c(67, 70, 71, 77, 78))
+tempS <- b_sMap %>% filter(SchoolDist %in% c(17, 18))
+tempC <- b_cMap %>% filter(BoroCD %in% c(309, 314, 317, 355, 308))
+
+# Plot the small section
+ggplot() +
+  geom_polygon(data=tempB,aes(x=long,y=lat,group = group),
+               color="#e41a1c", fill="gray90",alpha=0.5, size=0.8)+ # dark red
+  geom_polygon(data=tempP,aes(x=long,y=lat,group = group),
+                    color="#377eb8",fill=NA,size=0.8)+ # dark blue 
+  geom_polygon(data=tempS,aes(x=long,y=lat,group = group),
+               color="#ff7f00",fill=NA,size=0.8)+ # orange
+  geom_polygon(data=tempC,aes(x=long,y=lat,group = group),
+               color="#984ea3",fill=NA,size=0.8)+ # purple
+  coord_fixed(xlim=c(994493.9,1004652), ylim=c(176232.6,183971.2))+
+  theme_minimal()+
+  theme_special+
+  theme(legend.position = "none",
+        plot.caption = element_text(size=14))+
+  labs(caption =  expression(atop(paste("Figure 7e: Region "~R[1234]~ " of sub-borough region 1 in red, precinct region 2 in blue,"), "school district region 3 in orange, and community district region 4 in purple.")))
+@
+\end{figure}
+
 \subsection{Calculating Happiness Score Index}
 
-When calculating the happiness score index, we first take all of the data from the intersected regions and left join them with the data from precincts, school districts and community districts. We extract the area of each unique intersecting region, group by the sub-borough and take the weighted average of the different measures of happiness. (Note: For the housing measure of rent, we take the weighted average of the proportion of average monthly contract rent to average total household income. For the health measure of median death age range, we take the weighted average of the lowest value in the range.). We scale each happiness measure from 0 (Worst) to 1 (Best). We, then, take a sum of all five scaled measures to create the Happiness Score Index.
+When calculating the happiness score index, we first take all of the intersected regions and combine them with the data from their respective regions. For example, the crime measure will be combined with its respective precinct region. 
+We extract the area of each unique intersecting region. We call this area, $a_{ijkl}$, where $i$ represents the area for the $i^{th}$ sub-borough region, $j$ represents the area for the $j^{th}$ precinct region, $k$ represents the area for the $k^{th}$ school district region, and $l$ represents the area for the $l^{th}$ community district region.
+
+Using these areas as weights, we calculate the happiness score for each sub-borough region, $H_{i}$.
+
+$$H_{i} = a_{i...}(income_i) + a_{i...}(place_i) + a_{ijkl}(crime_j) + a_{ijkl}(education_k) + a_{ijkl}(health_l)$$
+
+where $income_i$ represents the average total household income for the $i^{th}$ sub-borough region, $place_i$ represents the proportion of average monthly contract rent to average total household income for the $i^{th}$ sub-borough region, $crime_j$ represents the total number of major felony offenses for the $j^{th}$ precinct region, $education_k$ represents the achievement rate of high school graduates for the $k^{th}$ school district region, and $health_l$ represents the lowest age in the median death age range for the $l^{th}$ community district region. (Note: The value of each weighted average is scaled  from 0 (Worst) to 1 (Best) before taking the sum.) This formula is how to calculate the happiness score index for each sub-borough region in New York City.
 
 \section{Results}
 
@@ -278,104 +326,35 @@ ggplot(b2) +
   coord_quickmap()+
   theme_minimal()+
   geom_text(data= b_labels, aes(x=long, y=lat, label = name,fontface=2),color="black",size=5)+
+  labs(title = "Happiness Score Index",
+       caption = "Figure 8: A map of New York City where darker yellow represents happier sub-borough regions.")+
   theme_special+
   theme(legend.key.size = unit(1.2, "cm"),
-        plot.title = element_text(size=18),
+        plot.title = element_text(size=18, hjust = 0.5),
         legend.text = element_text(size=11),
         legend.title = element_text(size=12),
-        legend.position = c(0.18,0.75))+
+        legend.position = c(0.18,0.75),
+        plot.caption = element_text(size=10))+
   scale_fill_gradient(name="Happiness\nScore\nIndex",limits=c(0,5),
-                      high="goldenrod", low="white")+
-  labs(title = "Happiness Score Index",
-       caption = "Figure 8")
-
+                      high="goldenrod", low="white")
 @
 \end{figure}
-
 
 
 \begin{figure}[t]
 <<Scatter 2014, echo=FALSE, warning=FALSE,cache=TRUE>>=
 # Plot scatter plot of happy index vs. immigrant pct with area as size
-
-# Create plot with only color/borough legend
-# scatb <- ggplot(data=b2) +
-#   geom_point(aes(x=immigrantPct,y=happiness,color=name),alpha=0.7)+
-#   labs(x="Immigrant Residency", y="Happy Score Index",
-#        title = "Sub-borough Analysis of Immigrant Residency and Happy Score Index") +
-#   theme_minimal()+
-#   theme(legend.background = element_rect(colour = "gray20"),
-#         legend.position = "top",
-#         legend.text = element_text(size=12),
-#         axis.title = element_text(size=12),
-#         axis.text = element_text(size=11))+
-#   guides(color = guide_legend(override.aes = list(size = 5)))+
-#   scale_x_continuous(limits=c(15,75),breaks = seq(10,90,by=10), 
-#                      labels=paste0(seq(10,90,by=10),"%"))+
-#   scale_y_continuous(limits=c(0.75,5),breaks = seq(1,5))+
-#   scale_color_brewer("",aesthetics = "colour",
-#                      palette = "Set2",type="qual")
-# 
-# # Extract the colour legend - leg1
-# leg1 <- gtable_filter(ggplot_gtable(ggplot_build(scatb)), "guide-box") 
-# 
-# # Create plot with only size legend
-# scath <- ggplot(data=b2) +
-#   geom_point(aes(x=immigrantPct,y=happiness,size=totalNum),alpha=0.7)+
-#   labs(x="Immigrant Residency", y="Happy Score Index",
-#        caption = "Figure 9") +
-#   theme_minimal()+
-#   theme(legend.background = element_rect(colour = "gray20"),
-#         legend.position = "bottom",
-#         legend.text = element_text(size=12),
-#         axis.title = element_text(size=12),
-#         axis.text = element_text(size=11))+
-#   scale_x_continuous(limits=c(15,75),breaks = seq(10,90,by=10), 
-#                      labels=paste0(seq(10,90,by=10),"%"))+
-#   scale_y_continuous(limits=c(0.75,5),breaks = seq(1,5))+
-#   scale_size_continuous(name="Total Households:",limits = c(35000,120000),
-#                         breaks = seq(35000,120000,by=20000),
-#                         labels = paste0(seq(35,120,by=20),"K"),
-#                         range = c(1, 10))
-# 
-# # Extract the size legend - leg2
-# leg2 <- gtable_filter(ggplot_gtable(ggplot_build(scath)), "guide-box") 
-# 
-# # Create a plot without any legend and both values
-# scat <- ggplot(data=b2) +
-#   geom_point(aes(x=immigrantPct,y=happiness,color=name,size=totalNum),alpha=0.7)+
-#   labs(x="Immigrant Residency", y="Happy Score Index"#,
-#        #title = "Sub-borough Analysis of Immigrant Residency and Happy Score Index",caption = "Figure 9"
-#        ) +
-#   theme_minimal()+
-#   theme(legend.position =  "none",
-#         legend.text = element_text(size=12),
-#         axis.title = element_text(size=12),
-#         axis.text = element_text(size=11))+
-#   scale_x_continuous(limits=c(15,75),breaks = seq(10,90,by=10), 
-#                      labels=paste0(seq(10,90,by=10),"%"))+
-#   scale_y_continuous(limits=c(0.75,5),breaks = seq(1,5))
-# 
-# # Create one plot, layer on top of another
-# scatNew <- arrangeGrob(leg1, scat, 
-#          heights = unit.c(leg1$height, unit(1, "npc") - leg1$height), ncol = 1)
-# 
-# scatNew <- arrangeGrob(scatNew, leg2,
-#           heights = unit.c(unit(1, "npc") - leg2$width, leg2$width), ncol = 1)
-# 
-# grid.newpage()
-# grid.draw(scatNew)
-
 ggplot(data=b2) +
    geom_point(aes(x=immigrantPct,y=happiness,color=name,size=totalNum),alpha=0.7)+
    labs(x="Immigrant Residency", y="Happiness Score Index",
-        title = "Immigrant Residency and Happiness Score Index", caption= "Figure 9") +
+        title = "Immigrant Residency and Happiness Score Index", 
+        caption= "Figure 9: A scatter plot where the color represents each sub-borough and the size represents number of households.") +
    theme_minimal()+
    theme(legend.background = element_rect(colour = "gray20"),
          legend.position = "top",
          legend.direction = "horizontal",
          legend.box = "vertical",
-         plot.title = element_text(size=18),
+         plot.title = element_text(size=18, hjust = 0.5),
          legend.text = element_text(size=12),
          axis.title = element_text(size=12),
          axis.text = element_text(size=11))+
@@ -400,7 +379,7 @@ In this analysis, we utilized the NYCHVS data and other external resources to cr
 
 \begin{references}
 \itemsep=0pt
-{
+{\footnotesize
 \item 
 [1)] "Happy City Index." What Works Centre for Wellbeing, 27 Oct. 2014, whatworkswellbeing.org/case-study/happy-city-index/.
 

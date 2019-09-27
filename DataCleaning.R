@@ -600,6 +600,72 @@ ggplot() +
 #save.image(file="CleanedData_Sep25.Rdata")
 load(file="CleanedData_Sep25.Rdata")
 
-# Use sub-borough 71 to zoom in on specific pieces
 
+# Create plot with only color/borough legend
+# scatb <- ggplot(data=b2) +
+#   geom_point(aes(x=immigrantPct,y=happiness,color=name),alpha=0.7)+
+#   labs(x="Immigrant Residency", y="Happy Score Index",
+#        title = "Sub-borough Analysis of Immigrant Residency and Happy Score Index") +
+#   theme_minimal()+
+#   theme(legend.background = element_rect(colour = "gray20"),
+#         legend.position = "top",
+#         legend.text = element_text(size=12),
+#         axis.title = element_text(size=12),
+#         axis.text = element_text(size=11))+
+#   guides(color = guide_legend(override.aes = list(size = 5)))+
+#   scale_x_continuous(limits=c(15,75),breaks = seq(10,90,by=10), 
+#                      labels=paste0(seq(10,90,by=10),"%"))+
+#   scale_y_continuous(limits=c(0.75,5),breaks = seq(1,5))+
+#   scale_color_brewer("",aesthetics = "colour",
+#                      palette = "Set2",type="qual")
+# 
+# # Extract the colour legend - leg1
+# leg1 <- gtable_filter(ggplot_gtable(ggplot_build(scatb)), "guide-box") 
+# 
+# # Create plot with only size legend
+# scath <- ggplot(data=b2) +
+#   geom_point(aes(x=immigrantPct,y=happiness,size=totalNum),alpha=0.7)+
+#   labs(x="Immigrant Residency", y="Happy Score Index",
+#        caption = "Figure 9") +
+#   theme_minimal()+
+#   theme(legend.background = element_rect(colour = "gray20"),
+#         legend.position = "bottom",
+#         legend.text = element_text(size=12),
+#         axis.title = element_text(size=12),
+#         axis.text = element_text(size=11))+
+#   scale_x_continuous(limits=c(15,75),breaks = seq(10,90,by=10), 
+#                      labels=paste0(seq(10,90,by=10),"%"))+
+#   scale_y_continuous(limits=c(0.75,5),breaks = seq(1,5))+
+#   scale_size_continuous(name="Total Households:",limits = c(35000,120000),
+#                         breaks = seq(35000,120000,by=20000),
+#                         labels = paste0(seq(35,120,by=20),"K"),
+#                         range = c(1, 10))
+# 
+# # Extract the size legend - leg2
+# leg2 <- gtable_filter(ggplot_gtable(ggplot_build(scath)), "guide-box") 
+# 
+# # Create a plot without any legend and both values
+# scat <- ggplot(data=b2) +
+#   geom_point(aes(x=immigrantPct,y=happiness,color=name,size=totalNum),alpha=0.7)+
+#   labs(x="Immigrant Residency", y="Happy Score Index"#,
+#        #title = "Sub-borough Analysis of Immigrant Residency and Happy Score Index",caption = "Figure 9"
+#        ) +
+#   theme_minimal()+
+#   theme(legend.position =  "none",
+#         legend.text = element_text(size=12),
+#         axis.title = element_text(size=12),
+#         axis.text = element_text(size=11))+
+#   scale_x_continuous(limits=c(15,75),breaks = seq(10,90,by=10), 
+#                      labels=paste0(seq(10,90,by=10),"%"))+
+#   scale_y_continuous(limits=c(0.75,5),breaks = seq(1,5))
+# 
+# # Create one plot, layer on top of another
+# scatNew <- arrangeGrob(leg1, scat, 
+#          heights = unit.c(leg1$height, unit(1, "npc") - leg1$height), ncol = 1)
+# 
+# scatNew <- arrangeGrob(scatNew, leg2,
+#           heights = unit.c(unit(1, "npc") - leg2$width, leg2$width), ncol = 1)
+# 
+# grid.newpage()
+# grid.draw(scatNew)
 
